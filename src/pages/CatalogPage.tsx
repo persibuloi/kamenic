@@ -38,11 +38,52 @@ export function CatalogPage() {
   // Eliminar productos duplicados por id
   const uniqueProducts = useMemo(() => {
     const seen = new Set();
-    return products.filter(p => {
-      if (seen.has(p.id)) return false;
+    const duplicates: string[] = [];
+    
+    const unique = products.filter(p => {
+      if (seen.has(p.id)) {
+        duplicates.push(p.id);
+        return false;
+      }
       seen.add(p.id);
       return true;
     });
+
+    // Log detallado para debugging
+    if (import.meta.env.DEV) {
+      console.log('=== ANÁLISIS DE PRODUCTOS ===');
+      console.log('Productos totales recibidos:', products.length);
+      console.log('Productos únicos después de eliminar duplicados:', unique.length);
+      console.log('IDs duplicados encontrados:', duplicates.length, duplicates);
+      
+      // Análisis por existencia
+      const conExistencia = unique.filter(p => p.existenciaActual > 0);
+      const sinExistencia = unique.filter(p => p.existenciaActual === 0);
+      const existenciaInvalida = unique.filter(p => typeof p.existenciaActual !== 'number' || p.existenciaActual < 0);
+      
+      console.log('Productos con existenciaActual > 0:', conExistencia.length);
+      console.log('Productos con existenciaActual = 0:', sinExistencia.length);
+      console.log('Productos con existencia inválida:', existenciaInvalida.length);
+      
+      // Mostrar algunos ejemplos de productos con existencia > 0
+      console.log('Ejemplos de productos con existencia > 0:', 
+        conExistencia.slice(0, 5).map(p => ({
+          id: p.id,
+          descripcion: p.descripcion.substring(0, 30) + '...',
+          existenciaActual: p.existenciaActual,
+          tipoMarca: p.tipoMarca
+        }))
+      );
+      
+      // Verificar si hay productos sin descripción o con datos faltantes
+      const sinDescripcion = unique.filter(p => !p.descripcion || p.descripcion.trim() === '');
+      const sinMarca = unique.filter(p => !p.tipoMarca || p.tipoMarca.trim() === '');
+      
+      console.log('Productos sin descripción:', sinDescripcion.length);
+      console.log('Productos sin marca:', sinMarca.length);
+    }
+
+    return unique;
   }, [products]);
 
   // Filtrar y ordenar productos
@@ -56,28 +97,64 @@ export function CatalogPage() {
   const filteredProducts = useMemo(() => {
     let filtered = [...uniqueProducts];
 
-    // Filtro: solo productos con existenciaActual > 0
-    filtered = filtered.filter(product => typeof product.existenciaActual === 'number' && product.existenciaActual > 0);
+    // Log para debugging - mostrar todos los productos únicos
+    if (import.meta.env.DEV) {
+      console.log('\n=== PROCESO DE FILTRADO ===');
+      console.log('Productos únicos antes del filtrado:', filtered.length);
+      console.log('Productos por existencia:', {
+        conExistencia: filtered.filter(p => p.existenciaActual > 0).length,
+        sinExistencia: filtered.filter(p => p.existenciaActual === 0).length,
+        existenciaUndefined: filtered.filter(p => p.existenciaActual === undefined || p.existenciaActual === null).length
+      });
+      console.log('Filtros activos:', filters);
+    }
+
+    // Filtro: SIEMPRE mostrar solo productos con existenciaActual > 0
+    const filteredByExistence = filtered.filter(product => 
+      typeof product.existenciaActual === 'number' && product.existenciaActual > 0
+    );
+    
+    if (import.meta.env.DEV) {
+      console.log('Después del filtro por existencia (solo > 0):', filteredByExistence.length);
+      console.log('Productos eliminados por falta de existencia:', filtered.length - filteredByExistence.length);
+    }
+    
+    filtered = filteredByExistence;
 
     // Filtro por tipoMarca
     if (filters.tipoMarca) {
+      const beforeBrandFilter = filtered.length;
       filtered = filtered.filter(product => {
         if (!product.tipoMarca) return false;
         // Normalizar para comparar
         return product.tipoMarca.trim().toLowerCase() === filters.tipoMarca.trim().toLowerCase();
       });
+      
+      if (import.meta.env.DEV) {
+        console.log(`Después del filtro por marca '${filters.tipoMarca}':`, filtered.length, `(eliminados: ${beforeBrandFilter - filtered.length})`);
+      }
     }
 
     // Filtro por término de búsqueda
     if (filters.searchTerm) {
+      const beforeSearchFilter = filtered.length;
       filtered = filtered.filter(product =>
         product.descripcion.toLowerCase().includes(filters.searchTerm.toLowerCase())
       );
+      
+      if (import.meta.env.DEV) {
+        console.log(`Después del filtro por búsqueda '${filters.searchTerm}':`, filtered.length, `(eliminados: ${beforeSearchFilter - filtered.length})`);
+      }
     }
 
     // Filtro de ofertas
     if (filters.showOnlyOffers) {
+      const beforeOffersFilter = filtered.length;
       filtered = filtered.filter(product => typeof product.precioOferta === 'number' && product.precioOferta < product.precio1);
+      
+      if (import.meta.env.DEV) {
+        console.log('Después del filtro de ofertas:', filtered.length, `(eliminados: ${beforeOffersFilter - filtered.length})`);
+      }
     }
 
     // Ordenamiento
@@ -94,6 +171,11 @@ export function CatalogPage() {
       default:
         // Mantener orden original
         break;
+    }
+
+    if (import.meta.env.DEV) {
+      console.log('PRODUCTOS FINALES DESPUÉS DE TODOS LOS FILTROS:', filtered.length);
+      console.log('=== FIN PROCESO DE FILTRADO ===\n');
     }
 
     return filtered;
@@ -125,11 +207,24 @@ export function CatalogPage() {
         {!loading && !error && (
           <div className="mb-6">
             <p className="text-gray-600">
-              {filteredProducts.length === products.length 
-                ? `Mostrando todos los ${products.length} productos`
-                : `Mostrando ${filteredProducts.length} de ${products.length} productos`
+              {/* Mostrar el conteo correcto basado en productos con existencia */}
+              {(() => {
+                const productsWithStock = uniqueProducts.filter(p => p.existenciaActual > 0);
+                return filteredProducts.length === productsWithStock.length 
+                  ? `Mostrando todos los ${productsWithStock.length} productos disponibles`
+                  : `Mostrando ${filteredProducts.length} de ${productsWithStock.length} productos disponibles`;
+              })()
               }
             </p>
+            {/* Solo mostrar debug en desarrollo local */}
+            {import.meta.env.DEV && import.meta.env.MODE === 'development' && (
+              <div className="mt-2 text-sm text-gray-500">
+                <p>Debug: Productos totales desde Airtable: {products.length}</p>
+                <p>Debug: Productos únicos: {uniqueProducts.length}</p>
+                <p>Debug: Productos con existencia &gt; 0: {uniqueProducts.filter(p => p.existenciaActual > 0).length}</p>
+                <p>Debug: Productos con existencia = 0: {uniqueProducts.filter(p => p.existenciaActual === 0).length}</p>
+              </div>
+            )}
           </div>
         )}
 
