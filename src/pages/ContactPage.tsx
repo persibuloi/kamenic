@@ -289,7 +289,7 @@ export function ContactPage() {
                 </svg>
               </div>
               <h3 className="font-semibold text-lg text-gray-900 mb-2">Entrega Rápida</h3>
-              <p className="text-gray-600">Envíos seguros y rápidos a todo Colombia en 24-48 horas</p>
+              <p className="text-gray-600">Envíos seguros y rápidos a todo Nicaragua en 24-48 horas</p>
             </div>
             <div className="text-center">
               <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-amber-200 rounded-2xl flex items-center justify-center mx-auto mb-4">

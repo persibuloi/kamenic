@@ -101,7 +101,7 @@ export function HomePage() {
                 <Truck className="h-8 w-8 text-amber-600" />
               </div>
               <h3 className="font-semibold text-lg text-gray-900 mb-2">Envío Rápido</h3>
-              <p className="text-gray-600">Entrega segura y rápida a todo el país</p>
+              <p className="text-gray-600">Entrega segura y rápida a todo Nicaragua</p>
             </div>
             <div className="text-center group">
               <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-amber-200 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-200">
