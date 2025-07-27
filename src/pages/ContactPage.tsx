@@ -74,10 +74,8 @@ export function ContactPage() {
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-1">Dirección</h3>
                     <p className="text-gray-600">
-                      Calle Principal 123<br />
-                      Centro Comercial Plaza Dorada<br />
-                      Local 45, Piso 2<br />
-                      Ciudad, Colombia
+                      Costa Rica<br />
+                      Perfumes y Fragancias
                     </p>
                   </div>
                 </div>
@@ -89,8 +87,8 @@ export function ContactPage() {
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-1">Teléfono</h3>
                     <p className="text-gray-600">
-                      +57 (1) 234-5678<br />
-                      +57 300 123 4567
+                      +505 8219-3629<br />
+                      WhatsApp disponible
                     </p>
                   </div>
                 </div>
@@ -102,8 +100,8 @@ export function ContactPage() {
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-1">Email</h3>
                     <p className="text-gray-600">
-                      info@essenceluxe.com<br />
-                      ventas@essenceluxe.com
+                      kamenic@gmail.com<br />
+                      Consultas y pedidos
                     </p>
                   </div>
                 </div>
@@ -272,7 +270,7 @@ export function ContactPage() {
         {/* Mapa o información adicional */}
         <div className="mt-12 bg-white rounded-2xl shadow-lg p-8 border border-amber-100">
           <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-            ¿Por qué elegir Essence Luxe?
+            ¿Por qué elegir KameNic?
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">

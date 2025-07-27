@@ -45,15 +45,15 @@ export function Footer() {
             <ul className="space-y-3">
               <li className="flex items-center text-gray-300">
                 <MapPin className="h-4 w-4 mr-2 text-amber-400" />
-                <span className="text-sm">Calle Principal 123, Ciudad</span>
+                <span className="text-sm">Costa Rica</span>
               </li>
               <li className="flex items-center text-gray-300">
                 <Phone className="h-4 w-4 mr-2 text-amber-400" />
-                <span className="text-sm">+1 (555) 123-4567</span>
+                <span className="text-sm">+505 8219-3629</span>
               </li>
               <li className="flex items-center text-gray-300">
                 <Mail className="h-4 w-4 mr-2 text-amber-400" />
-                <span className="text-sm">info@essenceluxe.com</span>
+                <span className="text-sm">kamenic@gmail.com</span>
               </li>
             </ul>
           </div>
@@ -63,7 +63,7 @@ export function Footer() {
         <div className="mt-8 pt-8 border-t border-gray-800">
           <div className="flex flex-col sm:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm mb-4 sm:mb-0">
-              © 2024 Essence Luxe. Todos los derechos reservados.
+              © 2024 KameNic. Todos los derechos reservados.
             </p>
             <a 
               href="https://wa.me/50582193629" 
