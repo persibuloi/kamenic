@@ -74,7 +74,7 @@ export function ContactPage() {
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-1">Dirección</h3>
                     <p className="text-gray-600">
-                      Costa Rica<br />
+                      KameNic<br />
                       Perfumes y Fragancias
                     </p>
                   </div>

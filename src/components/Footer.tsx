@@ -45,7 +45,7 @@ export function Footer() {
             <ul className="space-y-3">
               <li className="flex items-center text-gray-300">
                 <MapPin className="h-4 w-4 mr-2 text-amber-400" />
-                <span className="text-sm">Costa Rica</span>
+                <span className="text-sm">KameNic</span>
               </li>
               <li className="flex items-center text-gray-300">
                 <Phone className="h-4 w-4 mr-2 text-amber-400" />
