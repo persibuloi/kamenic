@@ -22,6 +22,10 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
   const uniqueTipoMarcas = Array.from(new Set(products.map(p => p.tipoMarca).filter(Boolean))).sort();
   const uniqueGeneros = Array.from(new Set(products.map(p => p.genero).filter(Boolean))).sort();
 
+  // DEBUG: Verificar valores de tipoMarca
+  console.log('DEBUG AdvancedFilters - uniqueTipoMarcas:', uniqueTipoMarcas);
+  console.log('DEBUG AdvancedFilters - productos con tipoMarca:', products.filter(p => p.tipoMarca).map(p => ({ id: p.id, tipoMarca: p.tipoMarca })).slice(0, 5));
+
   // Calcular rango de precios
   const prices = products.map(p => p.precioOferta || p.precio1);
   const minPrice = Math.floor(Math.min(...prices));

@@ -1,9 +1,16 @@
 import React from 'react';
 import { ProductDetailProps } from '../types/product';
+import { useCartContext } from '../context/CartContext';
 import './ProductDetail.css';
 
 const ProductDetail: React.FC<ProductDetailProps> = ({ product, onClose, onAddToCart }) => {
+  const { addToCart, isInCart, getItemQuantity } = useCartContext();
+  const inCart = isInCart(product.id);
+  const quantity = getItemQuantity(product.id);
+
   const handleAddToCart = () => {
+    addToCart(product, 1);
+    // También llamar onAddToCart si existe (para compatibilidad)
     if (onAddToCart) {
       onAddToCart(product);
     }
@@ -109,7 +116,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onClose, onAddTo
             <div className="product-actions">
               {product.existenciaActual > 0 ? (
                 <button 
-                  className="add-to-cart-btn"
+                  className={`add-to-cart-btn ${
+                    inCart ? 'in-cart' : ''
+                  }`}
                   onClick={handleAddToCart}
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -117,7 +126,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onClose, onAddTo
                     <circle cx="20" cy="21" r="1"></circle>
                     <path d="m1 1 4 4 2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
                   </svg>
-                  Agregar al Carrito
+                  {inCart ? `En carrito (${quantity}) - Agregar más` : 'Agregar al Carrito'}
                 </button>
               ) : (
                 <button className="out-of-stock-btn" disabled>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Sparkles, Award, Truck, Shield } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { LoadingSpinner, ProductGridSkeleton } from '../components/LoadingSpinner';
@@ -8,16 +8,45 @@ import { Product } from '../types/product';
 export function HomePage() {
   const { products, loading, error } = useAirtable();
   
-  // Productos destacados (los primeros 4 con ofertas o los primeros 4)
-  const featuredProducts = products
-    .filter(product =>
+  // Función para mezclar array aleatoriamente (Fisher-Yates shuffle)
+  const shuffleArray = (array: Product[]) => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  // Productos destacados - rotación aleatoria de productos en oferta
+  const displayProducts = useMemo(() => {
+    // Obtener todos los productos en oferta
+    const offerProducts = products.filter(product =>
       typeof product.precioOferta === 'number' &&
       typeof product.precio1 === 'number' &&
-      product.precioOferta < product.precio1
-    )
-    .slice(0, 4);
-  
-  const displayProducts = featuredProducts.length >= 4 ? featuredProducts : products.slice(0, 4);
+      product.precioOferta < product.precio1 &&
+      product.existenciaActual > 0 // Solo productos con stock
+    );
+
+    // Si hay productos en oferta, mostrar 4 aleatorios
+    if (offerProducts.length >= 4) {
+      return shuffleArray(offerProducts).slice(0, 4);
+    }
+    // Si hay menos de 4 ofertas, completar con productos regulares aleatorios
+    else if (offerProducts.length > 0) {
+      const regularProducts = products.filter(product => 
+        product.existenciaActual > 0 &&
+        !offerProducts.includes(product)
+      );
+      const shuffledRegular = shuffleArray(regularProducts);
+      return [...offerProducts, ...shuffledRegular].slice(0, 4);
+    }
+    // Si no hay ofertas, mostrar 4 productos aleatorios con stock
+    else {
+      const availableProducts = products.filter(product => product.existenciaActual > 0);
+      return shuffleArray(availableProducts).slice(0, 4);
+    }
+  }, [products]); // Se recalcula cada vez que cambian los productos
 
   return (
     <div className="min-h-screen">
@@ -62,8 +91,8 @@ export function HomePage() {
             <div className="relative">
               <div className="relative z-10">
                 <img
-                  src="/images/featured-perfume.png"
-                  alt="Perfume de lujo"
+                  src={displayProducts.length > 0 ? displayProducts[0].imagen : '/images/product-sample-1.jpg'}
+                  alt={displayProducts.length > 0 ? displayProducts[0].descripcion : 'Perfume de lujo'}
                   className="w-full h-96 object-cover rounded-3xl shadow-2xl"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;

@@ -17,15 +17,20 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
   const displayPrice = hasOffer ? product.precioOferta : product.precio1;
   const discount = hasOffer ? Math.round(((product.precio1 - product.precioOferta!) / product.precio1) * 100) : 0;
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Evitar que se abra la ficha del producto
     addToCart(product, 1);
   };
 
+  const handleViewDetails = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onClick) {
+      onClick();
+    }
+  };
+
   return (
-    <div 
-      className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden border border-amber-50 cursor-pointer"
-      onClick={onClick}
-    >
+    <div className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden border border-amber-50">
       {/* Etiqueta de oferta */}
       {hasOffer && (
         <div className="absolute top-4 left-4 z-10 bg-gradient-to-r from-red-500 to-red-600 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
@@ -90,20 +95,28 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
           </div>
         </div>
 
-        {/* Botón de agregar al carrito */}
-        <button
-          onClick={handleAddToCart}
-          className={`w-full py-3 px-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 ${
-            inCart
-              ? 'bg-green-600 hover:bg-green-700 text-white'
-              : 'bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white shadow-lg hover:shadow-xl'
-          }`}
-        >
-          <ShoppingBag className="h-4 w-4" />
-          <span>
-            {inCart ? `En carrito (${quantity})` : 'Agregar al carrito'}
-          </span>
-        </button>
+        {/* Botones de acción */}
+        <div className="flex space-x-2">
+          <button
+            onClick={handleViewDetails}
+            className="flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-700"
+          >
+            <span>Detalles</span>
+          </button>
+          <button
+            onClick={handleAddToCart}
+            className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 ${
+              inCart
+                ? 'bg-green-600 hover:bg-green-700 text-white'
+                : 'bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white shadow-lg hover:shadow-xl'
+            }`}
+          >
+            <ShoppingBag className="h-4 w-4" />
+            <span>
+              {inCart ? `En carrito (${quantity})` : 'Agregar'}
+            </span>
+          </button>
+        </div>
       </div>
     </div>
   );

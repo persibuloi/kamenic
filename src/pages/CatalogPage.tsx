@@ -12,6 +12,8 @@ export function CatalogPage() {
   const { products, loading, error } = useAirtable();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PRODUCTS_PER_PAGE = 16;
 
   // Obtener marcas disponibles (normalizadas y únicas)
   const availableBrands = useMemo(() => {
@@ -27,6 +29,22 @@ export function CatalogPage() {
       }
     });
     return Array.from(brandMap.values()).sort();
+  }, [products]);
+
+  // Obtener tipos de marca disponibles (normalizados y únicos)
+  const availableTipoMarcas = useMemo(() => {
+    const tipoMarcaMap = new Map<string, string>();
+    products.forEach(p => {
+      const rawTipoMarca = typeof p.tipoMarca === 'string' ? p.tipoMarca : '';
+      if (rawTipoMarca.trim()) {
+        const normalized = rawTipoMarca.trim().toLowerCase();
+        if (!tipoMarcaMap.has(normalized)) {
+          const capitalized = rawTipoMarca.trim().toUpperCase(); // Mantener en mayúsculas para NICHO, ÁRABES, etc.
+          tipoMarcaMap.set(normalized, capitalized);
+        }
+      }
+    });
+    return Array.from(tipoMarcaMap.values()).sort();
   }, [products]);
 
   // DEBUG: Mostrar valores reales de tipoMarca y availableBrands
@@ -101,6 +119,11 @@ export function CatalogPage() {
     showOnlyOffers: false,
     showOnlyInStock: true
   });
+
+  // Resetear página cuando cambien los filtros
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters]);
 
   const filteredProducts = useMemo(() => {
     let filtered = [...uniqueProducts];
@@ -230,7 +253,17 @@ export function CatalogPage() {
     return filtered;
   }, [uniqueProducts, filters]);
 
+  // Calcular productos paginados
+  const paginatedProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
+    const endIndex = startIndex + PRODUCTS_PER_PAGE;
+    return filteredProducts.slice(startIndex, endIndex);
+  }, [filteredProducts, currentPage, PRODUCTS_PER_PAGE]);
 
+  // Calcular información de paginación
+  const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
+  const hasNextPage = currentPage < totalPages;
+  const hasPrevPage = currentPage > 1;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-amber-50">
@@ -250,6 +283,7 @@ export function CatalogPage() {
           filters={filters}
           onFiltersChange={setFilters}
           availableBrands={availableBrands}
+          availableTipoMarcas={availableTipoMarcas}
         />
 
         {/* Contador de resultados */}
@@ -298,15 +332,94 @@ export function CatalogPage() {
         ) : (
           <>
             {filteredProducts.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredProducts.map((product) => (
-                  <ProductCard 
-                    key={product.id} 
-                    product={product} 
-                    onClick={() => setSelectedProduct(product)}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {paginatedProducts.map((product) => (
+                    <ProductCard 
+                      key={product.id} 
+                      product={product} 
+                      onClick={() => setSelectedProduct(product)}
+                    />
+                  ))}
+                </div>
+                
+                {/* Controles de paginación */}
+                {totalPages > 1 && (
+                  <div className="mt-12 flex flex-col items-center space-y-4">
+                    {/* Información de página */}
+                    <div className="text-sm text-gray-600">
+                      Página {currentPage} de {totalPages} 
+                      <span className="mx-2">•</span>
+                      Mostrando {paginatedProducts.length} de {filteredProducts.length} productos
+                    </div>
+                    
+                    {/* Botones de navegación */}
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => setCurrentPage(1)}
+                        disabled={!hasPrevPage}
+                        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Primera
+                      </button>
+                      
+                      <button
+                        onClick={() => setCurrentPage(currentPage - 1)}
+                        disabled={!hasPrevPage}
+                        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Anterior
+                      </button>
+                      
+                      {/* Números de página */}
+                      <div className="flex space-x-1">
+                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                          let pageNum;
+                          if (totalPages <= 5) {
+                            pageNum = i + 1;
+                          } else if (currentPage <= 3) {
+                            pageNum = i + 1;
+                          } else if (currentPage >= totalPages - 2) {
+                            pageNum = totalPages - 4 + i;
+                          } else {
+                            pageNum = currentPage - 2 + i;
+                          }
+                          
+                          return (
+                            <button
+                              key={pageNum}
+                              onClick={() => setCurrentPage(pageNum)}
+                              className={`px-3 py-2 text-sm font-medium rounded-md ${
+                                currentPage === pageNum
+                                  ? 'bg-amber-600 text-white'
+                                  : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      
+                      <button
+                        onClick={() => setCurrentPage(currentPage + 1)}
+                        disabled={!hasNextPage}
+                        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Siguiente
+                      </button>
+                      
+                      <button
+                        onClick={() => setCurrentPage(totalPages)}
+                        disabled={!hasNextPage}
+                        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Última
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="text-center py-12">
                 <div className="max-w-md mx-auto">
@@ -342,17 +455,7 @@ export function CatalogPage() {
           </>
         )}
 
-        {/* Paginación futura (placeholder) */}
-        {!loading && !error && filteredProducts.length > 12 && (
-          <div className="mt-12 text-center">
-            <p className="text-gray-500">
-              ¿No encuentras lo que buscas? 
-              <a href="#contact" className="text-amber-600 hover:text-amber-700 font-medium">
-                Contáctanos
-              </a>
-            </p>
-          </div>
-        )}
+
         {/* Modales */}
         {selectedProduct && (
           <ProductDetail

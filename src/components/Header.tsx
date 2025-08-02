@@ -31,6 +31,9 @@ export function Header({ onCartClick }: HeaderProps) {
             <a href="#catalog" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium">
               Catálogo
             </a>
+            <a href="#blog" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium">
+              Blog
+            </a>
             <a href="#featured" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium">
               Destacados
             </a>
@@ -86,6 +89,13 @@ export function Header({ onCartClick }: HeaderProps) {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Catálogo
+              </a>
+              <a 
+                href="#blog" 
+                className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium px-2 py-1"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Blog
               </a>
               <a 
                 href="#featured" 

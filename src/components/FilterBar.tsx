@@ -6,14 +6,19 @@ interface FilterBarProps {
   filters: FilterOptions;
   onFiltersChange: (filters: FilterOptions) => void;
   availableBrands: string[];
+  availableTipoMarcas: string[];
 }
 
-export function FilterBar({ filters, onFiltersChange, availableBrands }: FilterBarProps) {
+export function FilterBar({ filters, onFiltersChange, availableBrands, availableTipoMarcas }: FilterBarProps) {
   const handleSearchChange = (searchTerm: string) => {
     onFiltersChange({ ...filters, searchTerm });
   };
 
-  const handleBrandChange = (tipoMarca: string) => {
+  const handleBrandChange = (marca: string) => {
+    onFiltersChange({ ...filters, marca });
+  };
+
+  const handleTipoMarcaChange = (tipoMarca: string) => {
     onFiltersChange({ ...filters, tipoMarca });
   };
 
@@ -27,7 +32,7 @@ export function FilterBar({ filters, onFiltersChange, availableBrands }: FilterB
 
   return (
     <div className="bg-white shadow-lg rounded-2xl p-6 mb-8 border border-amber-100">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         {/* Buscador */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -40,18 +45,35 @@ export function FilterBar({ filters, onFiltersChange, availableBrands }: FilterB
           />
         </div>
 
-        {/* Filtro por tipoMarca */}
+        {/* Filtro por Marca */}
         <div className="relative">
           <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <select
-            value={filters.tipoMarca}
+            value={filters.marca || ''}
             onChange={(e) => handleBrandChange(e.target.value)}
             className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 appearance-none"
           >
-            <option value="">Todas las tipoMarcas</option>
+            <option value="">Todas las marcas</option>
             {availableBrands.map((brand) => (
               <option key={brand} value={brand}>
                 {brand}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Filtro por Tipo de Marca */}
+        <div className="relative">
+          <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <select
+            value={filters.tipoMarca || ''}
+            onChange={(e) => handleTipoMarcaChange(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 appearance-none"
+          >
+            <option value="">Todos los tipos</option>
+            {availableTipoMarcas.map((tipo) => (
+              <option key={tipo} value={tipo}>
+                {tipo}
               </option>
             ))}
           </select>
@@ -101,12 +123,23 @@ export function FilterBar({ filters, onFiltersChange, availableBrands }: FilterB
             </button>
           </span>
         )}
-        {filters.tipoMarca && (
+        {filters.marca && (
           <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
-            Marca: {filters.tipoMarca}
+            Marca: {filters.marca}
             <button
               onClick={() => handleBrandChange('')}
               className="ml-2 text-blue-600 hover:text-blue-800"
+            >
+              ×
+            </button>
+          </span>
+        )}
+        {filters.tipoMarca && (
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-purple-100 text-purple-800">
+            Tipo: {filters.tipoMarca}
+            <button
+              onClick={() => handleTipoMarcaChange('')}
+              className="ml-2 text-purple-600 hover:text-purple-800"
             >
               ×
             </button>

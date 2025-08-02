@@ -7,7 +7,10 @@ import { CatalogPage } from './pages/CatalogPage';
 import { ContactPage } from './pages/ContactPage';
 import { CartProvider } from './context/CartContext';
 
-type Page = 'home' | 'catalog' | 'contact';
+// Importación lazy del blog para evitar problemas
+const BlogPage = React.lazy(() => import('./pages/BlogPage'));
+
+type Page = 'home' | 'catalog' | 'contact' | 'blog';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -23,6 +26,9 @@ function App() {
           break;
         case 'contact':
           setCurrentPage('contact');
+          break;
+        case 'blog':
+          setCurrentPage('blog');
           break;
         case 'home':
         case 'featured':
@@ -44,14 +50,24 @@ function App() {
   }, []);
 
   const renderCurrentPage = () => {
-    switch (currentPage) {
-      case 'catalog':
-        return <CatalogPage />;
-      case 'contact':
-        return <ContactPage />;
-      default:
-        return <HomePage />;
-    }
+    return (
+      <>
+        <div className={currentPage === 'home' ? 'block' : 'hidden'}>
+          <HomePage />
+        </div>
+        <div className={currentPage === 'catalog' ? 'block' : 'hidden'}>
+          <CatalogPage />
+        </div>
+        <div className={currentPage === 'contact' ? 'block' : 'hidden'}>
+          <ContactPage />
+        </div>
+        <div className={currentPage === 'blog' ? 'block' : 'hidden'}>
+          <React.Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50 to-orange-50"></div>}>
+            <BlogPage />
+          </React.Suspense>
+        </div>
+      </>
+    );
   };
 
   return (

@@ -310,6 +310,15 @@
   box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
 }
 
+.add-to-cart-btn.in-cart {
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
+  box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+}
+
+.add-to-cart-btn.in-cart:hover {
+  box-shadow: 0 8px 25px rgba(39, 174, 96, 0.4);
+}
+
 .out-of-stock-btn {
   width: 100%;
   background: #bdc3c7;

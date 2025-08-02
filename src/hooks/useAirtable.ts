@@ -118,12 +118,38 @@ function getMarcaValue(fields: any): string {
 function getTipoMarcaValue(fields: any): string {
   const tipoMarcaFields = ['Tipo Marca', 'TIPO MARCA', 'tipo marca', 'TipoMarca'];
   
+  // DEBUG: Ver estructura de campos tipoMarca
+  if (import.meta.env.DEV) {
+    tipoMarcaFields.forEach(fieldName => {
+      if (fields[fieldName]) {
+        console.log(`DEBUG getTipoMarcaValue - Campo '${fieldName}':`, fields[fieldName]);
+        console.log(`DEBUG getTipoMarcaValue - Tipo:`, typeof fields[fieldName]);
+        console.log(`DEBUG getTipoMarcaValue - Es array:`, Array.isArray(fields[fieldName]));
+      }
+    });
+  }
+  
   for (const fieldName of tipoMarcaFields) {
     const fieldValue = fields[fieldName];
     if (fieldValue) {
-      if (Array.isArray(fieldValue) && fieldValue.length > 0) {
-        return String(fieldValue[0]).trim();
-      } else if (typeof fieldValue === 'string' && fieldValue.trim()) {
+      // Manejar campos IA con estructura {state, value, isStale}
+      if (typeof fieldValue === 'object' && fieldValue !== null && !Array.isArray(fieldValue)) {
+        if (fieldValue.value && typeof fieldValue.value === 'string' && fieldValue.value.trim()) {
+          return fieldValue.value.trim();
+        }
+      }
+      // Manejar arrays
+      else if (Array.isArray(fieldValue) && fieldValue.length > 0) {
+        const firstValue = fieldValue[0];
+        // Si el primer elemento es un objeto IA
+        if (typeof firstValue === 'object' && firstValue !== null && firstValue.value) {
+          return String(firstValue.value).trim();
+        }
+        // Si es un string normal
+        return String(firstValue).trim();
+      }
+      // Manejar strings normales
+      else if (typeof fieldValue === 'string' && fieldValue.trim()) {
         return fieldValue.trim();
       }
     }
