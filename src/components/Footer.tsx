@@ -76,7 +76,7 @@ export function Footer() {
           <div className="flex flex-col sm:flex-row justify-between items-center">
             <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
               <p className="text-gray-400 text-sm">
-                © 2024 KameNic. Todos los derechos reservados.
+                © 2024 KameNic. Todos los derechos reservados Managua, Nicaragua.
               </p>
               {/* Redes sociales destacadas */}
               <div className="flex items-center space-x-4">
