@@ -23,7 +23,6 @@ function transformAirtableBlogRecord(record: any): BlogPost {
     autor: getAutorValue(fields),
     fechaPublicacion: getFechaPublicacionValue(fields),
     estado: getEstadoValue(fields),
-    productosRelacionados: getProductosRelacionadosValue(fields),
     seoTitle: getSeoTitleValue(fields),
     seoDescription: getSeoDescriptionValue(fields),
     destacado: getDestacadoValue(fields),
