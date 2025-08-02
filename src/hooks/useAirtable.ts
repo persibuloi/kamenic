@@ -20,32 +20,76 @@ function transformAirtableRecord(record: AirtableRecord): Product {
     imagen = getDefaultImage(marcaValue);
   }
 
-  // Obtener el valor de marca de manera más robusta
-  const tipoMarca = getMarcaValue(record.fields);
-  
-  // Obtener existencia actual con mejor manejo de valores
+  // Obtener valores usando la nueva estructura estándar
+  const marca = getMarcaValue(record.fields);
+  const tipoMarca = getTipoMarcaValue(record.fields);
+  const genero = getGeneroValue(record.fields);
   const existenciaActual = getExistenciaValue(record.fields);
+  const codigoKame = getCodigoKameValue(record.fields);
+
+  const descripcionLarga = getDescripcionLargaValue(record.fields);
 
   const product = {
     id: record.id,
     descripcion: record.fields['Descripción'] || '',
+    descripcionLarga,
     precio1: record.fields['Precio1'] || 0,
     precioOferta: record.fields['Precio Oferta'] || undefined,
+    marca,
     tipoMarca,
-    codigoKame: record.fields['CODIGO KAME'] || '',
+    genero,
+    codigoKame,
     imagen,
     existenciaActual
   };
 
   // Log para debugging - solo en desarrollo
   if (import.meta.env.DEV) {
-    console.log('Producto procesado:', {
-      id: product.id,
-      descripcion: product.descripcion,
-      tipoMarca: product.tipoMarca,
-      existenciaActual: product.existenciaActual,
-      rawFields: record.fields
-    });
+    // Usar un contador estático para mostrar solo los primeros 3 productos
+    if (!(window as any).debugCounter) (window as any).debugCounter = 0;
+    
+    if ((window as any).debugCounter < 3) {
+      (window as any).debugCounter++;
+      console.log(`🔍 DEBUGGING PRODUCTO #${(window as any).debugCounter} (ID: ${product.id})`);
+      console.log('Código KAME:', product.codigoKame || 'NO TIENE');
+      console.log('Todos los campos disponibles:', Object.keys(record.fields));
+      console.log('Campos que contienen "descripcion" o "larga":', 
+        Object.keys(record.fields).filter(key => 
+          key.toLowerCase().includes('descripcion') || 
+          key.toLowerCase().includes('larga') ||
+          key.toLowerCase().includes('description') ||
+          key.toLowerCase().includes('detalles')
+        )
+      );
+      
+      // Mostrar valores de campos relacionados con descripción
+      const relatedFields = Object.keys(record.fields).filter(key => 
+        key.toLowerCase().includes('descripcion') || 
+        key.toLowerCase().includes('larga') ||
+        key.toLowerCase().includes('description') ||
+        key.toLowerCase().includes('detalles')
+      );
+      
+      if (relatedFields.length > 0) {
+        console.log('Valores de campos relacionados:');
+        relatedFields.forEach(field => {
+          const value = record.fields[field];
+          console.log(`  ${field}:`, typeof value === 'string' ? value.substring(0, 100) + '...' : value);
+        });
+      }
+      
+      console.log('Producto procesado:', {
+        id: product.id,
+        descripcion: product.descripcion,
+        descripcionLarga: product.descripcionLarga ? `SÍ TIENE (${product.descripcionLarga.length} chars)` : 'NO TIENE',
+        marca: product.marca,
+        tipoMarca: product.tipoMarca,
+        genero: product.genero,
+        existenciaActual: product.existenciaActual
+      });
+      
+      console.log('--- FIN DEBUG PRODUCTO ---\n');
+    }
   }
 
   return product;
@@ -54,7 +98,7 @@ function transformAirtableRecord(record: AirtableRecord): Product {
 // Función auxiliar para obtener el valor de marca de manera robusta
 function getMarcaValue(fields: any): string {
   // Intentar diferentes variaciones del campo marca
-  const marcaFields = ['MARCA', 'Marca', 'marca', 'tipo marca', 'Tipo Marca', 'TIPO MARCA'];
+  const marcaFields = ['Marca', 'MARCA', 'marca'];
   
   for (const fieldName of marcaFields) {
     const fieldValue = fields[fieldName];
@@ -68,6 +112,104 @@ function getMarcaValue(fields: any): string {
   }
   
   return ''; // Valor por defecto si no se encuentra marca
+}
+
+// Función auxiliar para obtener el tipo de marca
+function getTipoMarcaValue(fields: any): string {
+  const tipoMarcaFields = ['Tipo Marca', 'TIPO MARCA', 'tipo marca', 'TipoMarca'];
+  
+  for (const fieldName of tipoMarcaFields) {
+    const fieldValue = fields[fieldName];
+    if (fieldValue) {
+      if (Array.isArray(fieldValue) && fieldValue.length > 0) {
+        return String(fieldValue[0]).trim();
+      } else if (typeof fieldValue === 'string' && fieldValue.trim()) {
+        return fieldValue.trim();
+      }
+    }
+  }
+  
+  return ''; // Valor por defecto
+}
+
+// Función auxiliar para obtener el género
+function getGeneroValue(fields: any): string {
+  const generoFields = ['Género', 'GÉNERO', 'genero', 'Genero', 'Gender'];
+  
+  for (const fieldName of generoFields) {
+    const fieldValue = fields[fieldName];
+    if (fieldValue) {
+      if (Array.isArray(fieldValue) && fieldValue.length > 0) {
+        return String(fieldValue[0]).trim();
+      } else if (typeof fieldValue === 'string' && fieldValue.trim()) {
+        return fieldValue.trim();
+      }
+    }
+  }
+  
+  return ''; // Valor por defecto
+}
+
+// Función auxiliar para obtener el código KAME
+function getCodigoKameValue(fields: any): string {
+  const codigoFields = ['Código KAME', 'CODIGO KAME', 'CodigoKame', 'codigo kame'];
+  
+  for (const fieldName of codigoFields) {
+    const fieldValue = fields[fieldName];
+    if (fieldValue) {
+      if (Array.isArray(fieldValue) && fieldValue.length > 0) {
+        return String(fieldValue[0]).trim();
+      } else if (typeof fieldValue === 'string' && fieldValue.trim()) {
+        return fieldValue.trim();
+      }
+    }
+  }
+  
+  return ''; // Valor por defecto
+}
+
+// Función auxiliar para obtener la descripción larga
+function getDescripcionLargaValue(fields: any): string | undefined {
+  const descripcionFields = [
+    'Descripcion Larga',  // Sin tilde - nombre exacto del campo
+    'Descripción Larga', 
+    'DESCRIPCIÓN LARGA', 
+    'descripcion larga',
+    'Description',
+    'Detalles',
+    'DETALLES',
+    'detalles'
+  ];
+  
+  for (const fieldName of descripcionFields) {
+    const fieldValue = fields[fieldName];
+    if (fieldValue) {
+      // Manejar campos de IA de Airtable (estructura: {state, value, isStale})
+      if (typeof fieldValue === 'object' && fieldValue.value) {
+        const aiValue = fieldValue.value;
+        if (typeof aiValue === 'string' && aiValue.trim()) {
+          return aiValue.trim();
+        }
+      }
+      // Manejar arrays
+      else if (Array.isArray(fieldValue) && fieldValue.length > 0) {
+        const firstValue = fieldValue[0];
+        // Si el primer elemento es un objeto de IA
+        if (typeof firstValue === 'object' && firstValue.value) {
+          return String(firstValue.value).trim();
+        }
+        // Si es un string normal
+        const value = String(firstValue).trim();
+        return value || undefined;
+      }
+      // Manejar strings normales
+      else if (typeof fieldValue === 'string' && fieldValue.trim()) {
+        return fieldValue.trim();
+      }
+    }
+  }
+  
+  return undefined; // Valor por defecto
 }
 
 // Función auxiliar para obtener el valor de existencia

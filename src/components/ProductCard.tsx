@@ -5,9 +5,10 @@ import { useCartContext } from '../context/CartContext';
 
 interface ProductCardProps {
   product: Product;
+  onClick?: () => void;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, onClick }: ProductCardProps) {
   const { addToCart, isInCart, getItemQuantity } = useCartContext();
   const inCart = isInCart(product.id);
   const quantity = getItemQuantity(product.id);
@@ -21,7 +22,10 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <div className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden border border-amber-50">
+    <div 
+      className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden border border-amber-50 cursor-pointer"
+      onClick={onClick}
+    >
       {/* Etiqueta de oferta */}
       {hasOffer && (
         <div className="absolute top-4 left-4 z-10 bg-gradient-to-r from-red-500 to-red-600 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">

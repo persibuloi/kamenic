@@ -2,21 +2,25 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { ProductCard } from '../components/ProductCard';
 import { FilterBar } from '../components/FilterBar';
 import { LoadingSpinner, ProductGridSkeleton } from '../components/LoadingSpinner';
+import ProductDetail from '../components/ProductDetail';
+import AdvancedFilters from '../components/AdvancedFilters';
+
 import { useAirtable } from '../hooks/useAirtable';
 import { FilterOptions, Product } from '../types/product';
 
 export function CatalogPage() {
   const { products, loading, error } = useAirtable();
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
-  // Obtener tipoMarcas disponibles (normalizadas y únicas)
+  // Obtener marcas disponibles (normalizadas y únicas)
   const availableBrands = useMemo(() => {
     const brandMap = new Map<string, string>();
     products.forEach(p => {
-      const rawMarca = typeof p.tipoMarca === 'string' ? p.tipoMarca : '';
+      const rawMarca = typeof p.marca === 'string' ? p.marca : '';
       if (rawMarca.trim()) {
         const normalized = rawMarca.trim().toLowerCase();
         if (!brandMap.has(normalized)) {
-          // Capitalizar solo la primera letra de cada palabra
           const capitalized = rawMarca.trim().replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
           brandMap.set(normalized, capitalized);
         }
@@ -86,12 +90,16 @@ export function CatalogPage() {
     return unique;
   }, [products]);
 
-  // Filtrar y ordenar productos
+  // Filtrar y ordenar productos con nueva estructura
   const [filters, setFilters] = useState<FilterOptions>({
+    marca: '',
     tipoMarca: '',
+    genero: '',
     searchTerm: '',
+    priceRange: undefined,
     sortBy: 'default',
-    showOnlyOffers: false
+    showOnlyOffers: false,
+    showOnlyInStock: true
   });
 
   const filteredProducts = useMemo(() => {
@@ -109,37 +117,78 @@ export function CatalogPage() {
       console.log('Filtros activos:', filters);
     }
 
-    // Filtro: SIEMPRE mostrar solo productos con existenciaActual > 0
-    const filteredByExistence = filtered.filter(product => 
-      typeof product.existenciaActual === 'number' && product.existenciaActual > 0
-    );
-    
-    if (import.meta.env.DEV) {
-      console.log('Después del filtro por existencia (solo > 0):', filteredByExistence.length);
-      console.log('Productos eliminados por falta de existencia:', filtered.length - filteredByExistence.length);
+    // Filtro por stock (solo si showOnlyInStock está activo)
+    if (filters.showOnlyInStock) {
+      const filteredByExistence = filtered.filter(product => 
+        typeof product.existenciaActual === 'number' && product.existenciaActual > 0
+      );
+      
+      if (import.meta.env.DEV) {
+        console.log('Después del filtro por existencia (solo > 0):', filteredByExistence.length);
+        console.log('Productos eliminados por falta de existencia:', filtered.length - filteredByExistence.length);
+      }
+      
+      filtered = filteredByExistence;
     }
-    
-    filtered = filteredByExistence;
 
-    // Filtro por tipoMarca
-    if (filters.tipoMarca) {
+    // Filtro por marca
+    if (filters.marca) {
       const beforeBrandFilter = filtered.length;
       filtered = filtered.filter(product => {
+        if (!product.marca) return false;
+        return product.marca.trim().toLowerCase() === filters.marca.trim().toLowerCase();
+      });
+      
+      if (import.meta.env.DEV) {
+        console.log(`Después del filtro por marca '${filters.marca}':`, filtered.length, `(eliminados: ${beforeBrandFilter - filtered.length})`);
+      }
+    }
+
+    // Filtro por tipo de marca
+    if (filters.tipoMarca) {
+      const beforeTypeFilter = filtered.length;
+      filtered = filtered.filter(product => {
         if (!product.tipoMarca) return false;
-        // Normalizar para comparar
         return product.tipoMarca.trim().toLowerCase() === filters.tipoMarca.trim().toLowerCase();
       });
       
       if (import.meta.env.DEV) {
-        console.log(`Después del filtro por marca '${filters.tipoMarca}':`, filtered.length, `(eliminados: ${beforeBrandFilter - filtered.length})`);
+        console.log(`Después del filtro por tipo de marca '${filters.tipoMarca}':`, filtered.length, `(eliminados: ${beforeTypeFilter - filtered.length})`);
       }
     }
 
-    // Filtro por término de búsqueda
+    // Filtro por género
+    if (filters.genero) {
+      const beforeGenderFilter = filtered.length;
+      filtered = filtered.filter(product => {
+        if (!product.genero) return false;
+        return product.genero.trim().toLowerCase() === filters.genero.trim().toLowerCase();
+      });
+      
+      if (import.meta.env.DEV) {
+        console.log(`Después del filtro por género '${filters.genero}':`, filtered.length, `(eliminados: ${beforeGenderFilter - filtered.length})`);
+      }
+    }
+
+    // Filtro por rango de precios
+    if (filters.priceRange) {
+      const beforePriceFilter = filtered.length;
+      filtered = filtered.filter(product => {
+        const price = product.precioOferta || product.precio1;
+        return price >= filters.priceRange!.min && price <= filters.priceRange!.max;
+      });
+      
+      if (import.meta.env.DEV) {
+        console.log(`Después del filtro por precio $${filters.priceRange.min}-$${filters.priceRange.max}:`, filtered.length, `(eliminados: ${beforePriceFilter - filtered.length})`);
+      }
+    }
+
+    // Filtro por término de búsqueda (descripción y marca)
     if (filters.searchTerm) {
       const beforeSearchFilter = filtered.length;
       filtered = filtered.filter(product =>
-        product.descripcion.toLowerCase().includes(filters.searchTerm.toLowerCase())
+        product.descripcion.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
+        (product.marca && product.marca.toLowerCase().includes(filters.searchTerm.toLowerCase()))
       );
       
       if (import.meta.env.DEV) {
@@ -251,7 +300,11 @@ export function CatalogPage() {
             {filteredProducts.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {filteredProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard 
+                    key={product.id} 
+                    product={product} 
+                    onClick={() => setSelectedProduct(product)}
+                  />
                 ))}
               </div>
             ) : (
@@ -270,10 +323,14 @@ export function CatalogPage() {
                   </p>
                   <button 
                     onClick={() => setFilters({
+                      marca: '',
                       tipoMarca: '',
+                      genero: '',
                       searchTerm: '',
+                      priceRange: undefined,
                       sortBy: 'default',
-                      showOnlyOffers: false
+                      showOnlyOffers: false,
+                      showOnlyInStock: true
                     })}
                     className="bg-amber-600 hover:bg-amber-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200"
                   >
@@ -295,6 +352,30 @@ export function CatalogPage() {
               </a>
             </p>
           </div>
+        )}
+        {/* Modales */}
+        {selectedProduct && (
+          <ProductDetail
+            product={selectedProduct}
+            onClose={() => setSelectedProduct(null)}
+            onAddToCart={(product) => {
+              // Aquí puedes agregar lógica del carrito si tienes un contexto
+              console.log('Agregar al carrito:', product);
+              setSelectedProduct(null);
+            }}
+          />
+        )}
+
+        {showAdvancedFilters && (
+          <AdvancedFilters
+            products={uniqueProducts}
+            filters={filters}
+            onFiltersChange={(newFilters) => {
+              setFilters(newFilters);
+              setShowAdvancedFilters(false);
+            }}
+            onClose={() => setShowAdvancedFilters(false)}
+          />
         )}
       </div>
     </div>
