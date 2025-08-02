@@ -1,12 +1,14 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Sparkles, Award, Truck, Shield } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { LoadingSpinner, ProductGridSkeleton } from '../components/LoadingSpinner';
+import ProductDetail from '../components/ProductDetail';
 import { useAirtable } from '../hooks/useAirtable';
 import { Product } from '../types/product';
 
 export function HomePage() {
   const { products, loading, error } = useAirtable();
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   
   // Función para mezclar array aleatoriamente (Fisher-Yates shuffle)
   const shuffleArray = (array: Product[]) => {
@@ -79,6 +81,12 @@ export function HomePage() {
                   className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                 >
                   Explorar Catálogo
+                </a>
+                <a 
+                  href="#blog" 
+                  className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                >
+                  📚 Blog
                 </a>
                 <a 
                   href="#featured" 
@@ -169,7 +177,11 @@ export function HomePage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {displayProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard 
+                  key={product.id} 
+                  product={product} 
+                  onClick={() => setSelectedProduct(product)}
+                />
               ))}
             </div>
           )}
@@ -216,6 +228,18 @@ export function HomePage() {
           </a>
         </div>
       </section>
+
+      {/* Modal de detalle del producto */}
+      {selectedProduct && (
+        <ProductDetail
+          product={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+          onAddToCart={(product) => {
+            console.log('Agregar al carrito:', product);
+            setSelectedProduct(null);
+          }}
+        />
+      )}
     </div>
   );
 }

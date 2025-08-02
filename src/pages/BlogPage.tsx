@@ -201,10 +201,45 @@ export function BlogPage() {
               <span className="block text-4xl md:text-6xl font-light text-white/80 mt-2">& Perfumes</span>
             </h1>
             
-            <p className="text-xl md:text-2xl mb-12 text-white/70 max-w-4xl mx-auto leading-relaxed font-light">
+            <p className="text-xl md:text-2xl mb-8 text-white/70 max-w-4xl mx-auto leading-relaxed font-light">
               Sumérgete en el universo olfativo más exclusivo. Descubre reseñas expertas, 
               guías detalladas y las tendencias que están redefiniendo el mundo de las fragancias.
             </p>
+            
+            {/* Action Buttons */}
+            <div className="flex flex-wrap justify-center gap-4 mb-12">
+              <button
+                onClick={() => window.location.href = '/#catalog'}
+                className="group px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-2xl font-semibold hover:from-amber-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-amber-500/25 flex items-center space-x-2"
+              >
+                <span>🛍️</span>
+                <span>Ver Catálogo</span>
+                <span className="group-hover:translate-x-1 transition-transform">→</span>
+              </button>
+              
+              <button
+                onClick={() => {
+                  const articlesSection = document.querySelector('.articles-section');
+                  articlesSection?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="group px-8 py-4 bg-white/20 backdrop-blur-md text-white rounded-2xl font-semibold hover:bg-white/30 transition-all duration-300 transform hover:scale-105 shadow-2xl border border-white/30 flex items-center space-x-2"
+              >
+                <span>📚</span>
+                <span>Ver Artículos</span>
+                <span className="group-hover:translate-y-1 transition-transform">↓</span>
+              </button>
+              
+              <button
+                onClick={() => {
+                  const featuredSection = document.querySelector('.featured-section');
+                  featuredSection?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="group px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-purple-500/25 flex items-center space-x-2"
+              >
+                <span>⭐</span>
+                <span>Destacados</span>
+              </button>
+            </div>
             
             <div className="flex flex-wrap items-center justify-center gap-8 text-white/60">
               <div className="flex items-center space-x-3 bg-white/5 backdrop-blur-sm rounded-full px-6 py-3 border border-white/10">
