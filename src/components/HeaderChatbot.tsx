@@ -215,7 +215,7 @@ export function HeaderChatbot({ isOpen, onClose, webhookUrl }: HeaderChatbotProp
       <div className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40" onClick={onClose}></div>
       
       {/* Contenedor principal del chatbot - Responsive */}
-      <div className="fixed top-16 right-3 left-3 bottom-24 z-50 bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col overflow-hidden max-h-[60vh] md:fixed md:top-16 md:right-4 md:left-auto md:bottom-auto md:w-[400px] md:h-[400px]">
+      <div className="fixed top-16 right-6 left-6 bottom-24 z-50 bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col overflow-hidden max-h-[60vh] md:fixed md:top-16 md:right-4 md:left-auto md:bottom-auto md:w-[400px] md:h-[400px]">
         {/* Header del chatbot - Responsive */}
         <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white p-2 md:p-4 rounded-t-lg flex items-center justify-between flex-shrink-0">
           <div className="flex items-center space-x-3">
