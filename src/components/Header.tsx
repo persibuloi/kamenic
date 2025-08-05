@@ -115,15 +115,32 @@ export function Header({ onCartClick, webhookUrl }: HeaderProps) {
                 </div>
               )}
             </div>
-            {/* Chatbot */}
+            {/* Chatbot IA */}
             <div className="relative">
               <button 
                 onClick={() => setIsChatbotOpen(!isChatbotOpen)}
-                className="relative p-2 text-gray-700 hover:text-amber-600 transition-colors duration-200"
-                title="Asistente de Fragancias IA"
+                className="relative group p-2 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                title="Asistente IA de Fragancias - Pregúntame sobre perfumes"
               >
-                <MessageCircle className="h-5 w-5" />
-                <span className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></span>
+                {/* Icono principal con efectos mejorados */}
+                <div className="relative">
+                  <MessageCircle className="h-5 w-5 ai-pulse" />
+                  {/* Efecto blink en el icono mejorado */}
+                  <div className="absolute inset-0 bg-white rounded-full opacity-0 animate-ping"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-white to-transparent rounded-full opacity-0 group-hover:opacity-30 animate-pulse"></div>
+                </div>
+                
+                {/* Indicador IA con efecto blink mejorado */}
+                <div className="absolute -top-1 -right-1 flex items-center justify-center">
+                  <div className="w-4 h-4 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full border-2 border-white shadow-sm ai-pulse ai-glow">
+                    <div className="w-full h-full bg-white rounded-full opacity-30 animate-ping"></div>
+                  </div>
+                  {/* Texto "IA" pequeño con animación */}
+                  <span className="absolute text-[8px] font-bold text-white drop-shadow-sm ai-pulse">IA</span>
+                </div>
+                
+                {/* Efecto de brillo */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform -skew-x-12 transition-opacity duration-300"></div>
               </button>
               
               {/* Chatbot desplegable */}

@@ -20,6 +20,46 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, X, Minimize2 } from 'lucide-react';
 
+// Estilos CSS personalizados para animaciones mejoradas
+const customStyles = `
+  @keyframes aiPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.1); }
+  }
+  
+  @keyframes aiGlow {
+    0%, 100% { box-shadow: 0 0 5px rgba(34, 197, 94, 0.5); }
+    50% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.8), 0 0 30px rgba(34, 197, 94, 0.6); }
+  }
+  
+  .ai-pulse {
+    animation: aiPulse 2s ease-in-out infinite;
+  }
+  
+  .ai-glow {
+    animation: aiGlow 3s ease-in-out infinite;
+  }
+  
+  .safe-area-padding-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 1rem);
+  }
+  
+  @media (max-width: 768px) {
+    .mobile-full-screen {
+      height: 100vh;
+      height: 100dvh; /* Para navegadores que soportan dvh */
+    }
+  }
+`;
+
+// Inyectar estilos en el head si no existen
+if (typeof document !== 'undefined' && !document.getElementById('chatbot-custom-styles')) {
+  const styleElement = document.createElement('style');
+  styleElement.id = 'chatbot-custom-styles';
+  styleElement.textContent = customStyles;
+  document.head.appendChild(styleElement);
+}
+
 /**
  * Interfaz para los mensajes del chat
  * 
@@ -170,90 +210,105 @@ export function HeaderChatbot({ isOpen, onClose, webhookUrl }: HeaderChatbotProp
   if (!isOpen) return null;
 
   return (
-    <div className="absolute top-full right-0 mt-2 w-96 h-96 bg-white rounded-lg shadow-2xl border border-gray-200 z-50 flex flex-col">
-      {/* Header del chatbot */}
-      <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white p-4 rounded-t-lg flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="relative">
-            <Bot className="h-6 w-6" />
-            <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></div>
-          </div>
-          <div>
-            <h3 className="font-semibold text-lg">Asistente de Fragancias</h3>
-            <p className="text-amber-100 text-sm">Especialista en perfumes IA</p>
-          </div>
-        </div>
-        <button
-          onClick={onClose}
-          className="text-amber-100 hover:text-white transition-colors p-1 rounded-full hover:bg-amber-600"
-        >
-          <X className="h-5 w-5" />
-        </button>
-      </div>
-
-      {/* Área de mensajes */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-gray-50 to-white">
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
-          >
-            <div
-              className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
-                message.isUser
-                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white'
-                  : 'bg-white border border-gray-200 text-gray-800 shadow-sm'
-              }`}
-            >
-              <p className="text-sm">{message.text}</p>
-              <p className={`text-xs mt-1 ${
-                message.isUser ? 'text-amber-100' : 'text-gray-500'
-              }`}>
-                {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </p>
+    <>
+      {/* Overlay para móviles */}
+      <div className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40" onClick={onClose}></div>
+      
+      {/* Modal del chatbot - Responsive */}
+      <div className="
+        fixed inset-0 z-50 md:absolute md:top-full md:right-0 md:inset-auto md:mt-2 
+        w-full h-full md:w-96 md:h-[480px] md:right-0
+        bg-white rounded-none md:rounded-lg shadow-2xl border-0 md:border border-gray-200 flex flex-col
+        md:max-h-[calc(100vh-120px)]
+      ">
+        {/* Header del chatbot - Responsive */}
+        <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white p-4 md:p-4 pt-8 md:pt-4 rounded-none md:rounded-t-lg flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="relative">
+              <Bot className="h-6 w-6 md:h-6 md:w-6 ai-pulse" />
+              <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white ai-glow"></div>
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg md:text-lg">Asistente IA de Fragancias</h3>
+              <p className="text-amber-100 text-sm md:text-sm">Especialista en perfumes • En línea</p>
             </div>
           </div>
-        ))}
-        
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-white border border-gray-200 rounded-2xl px-4 py-2 shadow-sm">
-              <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-              </div>
-            </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Input de mensaje */}
-      <div className="p-4 border-t border-gray-200 bg-white rounded-b-lg">
-        <div className="flex space-x-2">
-          <textarea
-            ref={inputRef}
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Escribe tu mensaje..."
-            className="flex-1 resize-none border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
-            rows={1}
-            disabled={isLoading}
-          />
           <button
-            onClick={sendMessage}
-            disabled={!inputValue.trim() || isLoading}
-            className="bg-gradient-to-r from-amber-500 to-amber-600 text-white p-2 rounded-lg hover:from-amber-600 hover:to-amber-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center"
+            onClick={onClose}
+            className="text-amber-100 hover:text-white transition-colors p-2 md:p-1 rounded-full hover:bg-amber-600"
           >
-            <Send className="h-4 w-4" />
+            <X className="h-6 w-6 md:h-5 md:w-5" />
           </button>
         </div>
-        <p className="text-xs text-gray-500 mt-2">
-          Presiona Enter para enviar, Shift+Enter para nueva línea
-        </p>
+
+        {/* Área de mensajes - Responsive */}
+        <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4 bg-gradient-to-b from-gray-50 to-white">
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
+            >
+              <div
+                className={`max-w-[85%] md:max-w-xs lg:max-w-md px-3 md:px-4 py-2 md:py-2 rounded-2xl ${
+                  message.isUser
+                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white'
+                    : 'bg-white border border-gray-200 text-gray-800 shadow-sm'
+                }`}
+              >
+                <p className="text-sm md:text-sm leading-relaxed">{message.text}</p>
+                <p className={`text-xs mt-1 ${
+                  message.isUser ? 'text-amber-100' : 'text-gray-500'
+                }`}>
+                  {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
+            </div>
+          ))}
+        
+          {isLoading && (
+            <div className="flex justify-start">
+              <div className="bg-white border border-gray-200 rounded-2xl px-3 md:px-4 py-2 shadow-sm">
+                <div className="flex space-x-1 items-center">
+                  <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                  <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  <span className="text-xs text-gray-500 ml-2">IA escribiendo...</span>
+                </div>
+              </div>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Input de mensaje - Responsive */}
+        <div className="p-3 md:p-4 border-t border-gray-200 bg-white rounded-none md:rounded-b-lg safe-area-padding-bottom">
+          <div className="flex space-x-2">
+            <textarea
+              ref={inputRef}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Pregúntame sobre perfumes..."
+              className="flex-1 resize-none border border-gray-300 rounded-lg px-3 py-2 md:px-3 md:py-2 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm md:text-sm min-h-[40px]"
+              rows={1}
+              disabled={isLoading}
+            />
+            <button
+              onClick={sendMessage}
+              disabled={!inputValue.trim() || isLoading}
+              className="bg-gradient-to-r from-amber-500 to-amber-600 text-white p-2 md:p-2 rounded-lg hover:from-amber-600 hover:to-amber-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center min-w-[40px]"
+            >
+              <Send className="h-4 w-4 md:h-4 md:w-4" />
+            </button>
+          </div>
+          <p className="text-xs text-gray-500 mt-2 hidden md:block">
+            Presiona Enter para enviar, Shift+Enter para nueva línea
+          </p>
+          <p className="text-xs text-gray-500 mt-2 md:hidden">
+            Toca para enviar tu consulta
+          </p>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
