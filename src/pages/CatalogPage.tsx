@@ -47,6 +47,22 @@ export function CatalogPage() {
     return Array.from(tipoMarcaMap.values()).sort();
   }, [products]);
 
+  // Obtener géneros disponibles (normalizados y únicos)
+  const availableGenders = useMemo(() => {
+    const genderMap = new Map<string, string>();
+    products.forEach(p => {
+      const rawGenero = typeof p.genero === 'string' ? p.genero : '';
+      if (rawGenero.trim()) {
+        const normalized = rawGenero.trim().toLowerCase();
+        if (!genderMap.has(normalized)) {
+          const capitalized = rawGenero.trim().replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+          genderMap.set(normalized, capitalized);
+        }
+      }
+    });
+    return Array.from(genderMap.values()).sort();
+  }, [products]);
+
   // DEBUG: Mostrar valores reales de tipoMarca y availableBrands
   useEffect(() => {
     if (products) {
@@ -119,6 +135,37 @@ export function CatalogPage() {
     showOnlyOffers: false,
     showOnlyInStock: true
   });
+  
+  // Manejar parámetros de búsqueda desde la URL
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      console.log('CatalogPage - Hash actual:', hash);
+      
+      const searchParams = new URLSearchParams(hash.split('?')[1] || '');
+      const searchFromUrl = searchParams.get('search');
+      
+      console.log('CatalogPage - Parámetro de búsqueda:', searchFromUrl);
+      console.log('CatalogPage - Filtro actual:', filters.searchTerm);
+      
+      if (searchFromUrl && searchFromUrl !== filters.searchTerm) {
+        console.log('CatalogPage - Actualizando filtro de búsqueda a:', searchFromUrl);
+        setFilters(prev => ({
+          ...prev,
+          searchTerm: searchFromUrl
+        }));
+        setCurrentPage(1); // Resetear a la primera página
+      }
+    };
+    
+    // Ejecutar al cargar y cuando cambie el hash
+    handleHashChange();
+    window.addEventListener('hashchange', handleHashChange);
+    
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, [filters.searchTerm]);
 
   // Resetear página cuando cambien los filtros
   useEffect(() => {
@@ -284,6 +331,7 @@ export function CatalogPage() {
           onFiltersChange={setFilters}
           availableBrands={availableBrands}
           availableTipoMarcas={availableTipoMarcas}
+          availableGenders={availableGenders}
         />
 
         {/* Contador de resultados */}

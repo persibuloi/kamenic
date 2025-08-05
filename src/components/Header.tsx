@@ -1,15 +1,50 @@
 import React, { useState } from 'react';
-import { ShoppingBag, Menu, X, Search, Heart } from 'lucide-react';
+import { ShoppingBag, Menu, X, Search, Heart, MessageCircle } from 'lucide-react';
 import { useCartContext } from '../context/CartContext';
+import { useFavoritesContext } from '../context/FavoritesContext';
+
+import { FavoritesModal } from './FavoritesModal';
+import { HeaderChatbot } from './HeaderChatbot';
 
 interface HeaderProps {
   onCartClick: () => void;
+  webhookUrl?: string;
 }
 
-export function Header({ onCartClick }: HeaderProps) {
+export function Header({ onCartClick, webhookUrl }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const { getTotalItems } = useCartContext();
+  const { getFavoritesCount } = useFavoritesContext();
   const totalItems = getTotalItems();
+  const favoritesCount = getFavoritesCount();
+
+
+  
+  // Función para manejar la búsqueda
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      const searchTerm = searchQuery.trim();
+      console.log('Buscando:', searchTerm);
+      
+      // Navegar al catálogo con el término de búsqueda
+      const newHash = `catalog?search=${encodeURIComponent(searchTerm)}`;
+      console.log('Navegando a:', newHash);
+      
+      window.location.hash = newHash;
+      setSearchQuery('');
+      setIsSearchOpen(false);
+      
+      // Forzar actualización si ya estamos en el catálogo
+      if (window.location.hash.includes('catalog')) {
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
+      }
+    }
+  };
 
   return (
     <header className="bg-white shadow-lg border-b border-amber-100 sticky top-0 z-50">
@@ -44,12 +79,75 @@ export function Header({ onCartClick }: HeaderProps) {
 
           {/* Iconos de acción */}
           <div className="flex items-center space-x-4">
-            <button className="p-2 text-gray-700 hover:text-amber-600 transition-colors duration-200">
-              <Search className="h-5 w-5" />
+            {/* Búsqueda */}
+            <div className="relative">
+              <button 
+                onClick={() => setIsSearchOpen(!isSearchOpen)}
+                className="p-2 text-gray-700 hover:text-amber-600 transition-colors duration-200"
+                title="Buscar productos"
+              >
+                <Search className="h-5 w-5" />
+              </button>
+              
+              {/* Barra de búsqueda desplegable */}
+              {isSearchOpen && (
+                <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 p-4 z-50">
+                  <form onSubmit={handleSearch} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Buscar perfumes, marcas..."
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      autoFocus
+                    />
+                    <button
+                      type="submit"
+                      disabled={!searchQuery.trim()}
+                      className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <Search className="h-4 w-4" />
+                    </button>
+                  </form>
+                  <div className="mt-2 text-xs text-gray-500">
+                    Busca por nombre, marca, género o tipo de fragancia
+                  </div>
+                </div>
+              )}
+            </div>
+            {/* Chatbot */}
+            <div className="relative">
+              <button 
+                onClick={() => setIsChatbotOpen(!isChatbotOpen)}
+                className="relative p-2 text-gray-700 hover:text-amber-600 transition-colors duration-200"
+                title="Asistente de Fragancias IA"
+              >
+                <MessageCircle className="h-5 w-5" />
+                <span className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></span>
+              </button>
+              
+              {/* Chatbot desplegable */}
+              <HeaderChatbot 
+                isOpen={isChatbotOpen}
+                onClose={() => setIsChatbotOpen(false)}
+                webhookUrl={webhookUrl}
+              />
+            </div>
+
+            {/* Favoritos */}
+            <button 
+              onClick={() => setIsFavoritesOpen(true)}
+              className="relative p-2 text-gray-700 hover:text-red-500 transition-colors duration-200"
+              title="Mis favoritos"
+            >
+              <Heart className={`h-5 w-5 ${favoritesCount > 0 ? 'text-red-500 fill-current' : ''}`} />
+              {favoritesCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                  {favoritesCount}
+                </span>
+              )}
             </button>
-            <button className="p-2 text-gray-700 hover:text-amber-600 transition-colors duration-200">
-              <Heart className="h-5 w-5" />
-            </button>
+
             <button 
               onClick={onCartClick}
               className="relative p-2 text-gray-700 hover:text-amber-600 transition-colors duration-200"
@@ -114,6 +212,13 @@ export function Header({ onCartClick }: HeaderProps) {
             </nav>
           </div>
         )}
+
+        
+        {/* Modal de Favoritos */}
+        <FavoritesModal 
+          isOpen={isFavoritesOpen}
+          onClose={() => setIsFavoritesOpen(false)}
+        />
       </div>
     </header>
   );

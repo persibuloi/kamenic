@@ -2,6 +2,7 @@ import React from 'react';
 import { ShoppingBag, Heart, Star } from 'lucide-react';
 import { Product } from '../types/product';
 import { useCartContext } from '../context/CartContext';
+import { useFavoritesContext } from '../context/FavoritesContext';
 
 interface ProductCardProps {
   product: Product;
@@ -10,8 +11,10 @@ interface ProductCardProps {
 
 export function ProductCard({ product, onClick }: ProductCardProps) {
   const { addToCart, isInCart, getItemQuantity } = useCartContext();
+  const { addToFavorites, removeFromFavorites, isFavorite } = useFavoritesContext();
   const inCart = isInCart(product.id);
   const quantity = getItemQuantity(product.id);
+  const isProductFavorite = isFavorite(product.id);
   
   const hasOffer = product.precioOferta && product.precioOferta < product.precio1;
   const displayPrice = hasOffer ? product.precioOferta : product.precio1;
@@ -19,13 +22,27 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation(); // Evitar que se abra la ficha del producto
-    addToCart(product, 1);
+    
+    const success = addToCart(product, 1);
+    if (!success) {
+      // Mostrar mensaje de error si no se pudo agregar
+      alert(`No se pudo agregar al carrito. Stock disponible: ${product.existenciaActual}`);
+    }
   };
 
   const handleViewDetails = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onClick) {
       onClick();
+    }
+  };
+
+  const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Evitar que se abra la ficha del producto
+    if (isProductFavorite) {
+      removeFromFavorites(product.id);
+    } else {
+      addToFavorites(product);
     }
   };
 
@@ -39,8 +56,20 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
       )}
 
       {/* Botón de favoritos */}
-      <button className="absolute top-4 right-4 z-10 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-lg hover:bg-white transition-all duration-200 group-hover:scale-110">
-        <Heart className="h-4 w-4 text-gray-600 hover:text-red-500 transition-colors duration-200" />
+      <button 
+        onClick={handleToggleFavorite}
+        className={`absolute top-4 right-4 z-10 p-2 backdrop-blur-sm rounded-full shadow-lg transition-all duration-200 group-hover:scale-110 ${
+          isProductFavorite 
+            ? 'bg-red-50 hover:bg-red-100' 
+            : 'bg-white/80 hover:bg-white'
+        }`}
+        title={isProductFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+      >
+        <Heart className={`h-4 w-4 transition-colors duration-200 ${
+          isProductFavorite 
+            ? 'text-red-500 fill-current' 
+            : 'text-gray-600 hover:text-red-500'
+        }`} />
       </button>
 
       {/* Imagen del producto */}
@@ -105,15 +134,23 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
           </button>
           <button
             onClick={handleAddToCart}
+            disabled={product.existenciaActual <= 0}
             className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 ${
-              inCart
+              product.existenciaActual <= 0
+                ? 'bg-gray-400 cursor-not-allowed text-white'
+                : inCart
                 ? 'bg-green-600 hover:bg-green-700 text-white'
                 : 'bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white shadow-lg hover:shadow-xl'
             }`}
           >
             <ShoppingBag className="h-4 w-4" />
             <span>
-              {inCart ? `En carrito (${quantity})` : 'Agregar'}
+              {product.existenciaActual <= 0 
+                ? 'Sin Stock' 
+                : inCart 
+                ? `En carrito (${quantity})` 
+                : 'Agregar'
+              }
             </span>
           </button>
         </div>

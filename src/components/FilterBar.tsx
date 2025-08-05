@@ -7,9 +7,10 @@ interface FilterBarProps {
   onFiltersChange: (filters: FilterOptions) => void;
   availableBrands: string[];
   availableTipoMarcas: string[];
+  availableGenders: string[];
 }
 
-export function FilterBar({ filters, onFiltersChange, availableBrands, availableTipoMarcas }: FilterBarProps) {
+export function FilterBar({ filters, onFiltersChange, availableBrands, availableTipoMarcas, availableGenders }: FilterBarProps) {
   const handleSearchChange = (searchTerm: string) => {
     onFiltersChange({ ...filters, searchTerm });
   };
@@ -19,7 +20,11 @@ export function FilterBar({ filters, onFiltersChange, availableBrands, available
   };
 
   const handleTipoMarcaChange = (tipoMarca: string) => {
-    onFiltersChange({ ...filters, tipoMarca });
+    onFiltersChange({ ...filters, tipoMarca: tipoMarca || '' });
+  };
+
+  const handleGenderChange = (genero: string) => {
+    onFiltersChange({ ...filters, genero: genero || '' });
   };
 
   const handleSortChange = (sortBy: FilterOptions['sortBy']) => {
@@ -74,6 +79,23 @@ export function FilterBar({ filters, onFiltersChange, availableBrands, available
             {availableTipoMarcas.map((tipo) => (
               <option key={tipo} value={tipo}>
                 {tipo}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Filtro por Género */}
+        <div className="relative">
+          <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <select
+            value={filters.genero || ''}
+            onChange={(e) => handleGenderChange(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 appearance-none"
+          >
+            <option value="">Todos los géneros</option>
+            {availableGenders.map((genero) => (
+              <option key={genero} value={genero}>
+                {genero}
               </option>
             ))}
           </select>
@@ -140,6 +162,17 @@ export function FilterBar({ filters, onFiltersChange, availableBrands, available
             <button
               onClick={() => handleTipoMarcaChange('')}
               className="ml-2 text-purple-600 hover:text-purple-800"
+            >
+              ×
+            </button>
+          </span>
+        )}
+        {filters.genero && (
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
+            Género: {filters.genero}
+            <button
+              onClick={() => handleGenderChange('')}
+              className="ml-2 text-green-600 hover:text-green-800"
             >
               ×
             </button>

@@ -26,11 +26,26 @@
 - ✅ Sistema de ofertas automático
 - ✅ Integración con WhatsApp para pedidos
 
-### 🔗 Integración Airtable
+### 🤖 Asistente IA de Fragancias
+- ✅ Chatbot especializado en perfumes integrado en header
+- ✅ Conexión en tiempo real con n8n para respuestas inteligentes
+- ✅ Asesoría personalizada sobre fragancias y marcas
+- ✅ Interfaz moderna con diseño premium
+- ✅ Respuestas contextuales sobre productos y recomendaciones
+
+### 🔗 Integraciones
+
+#### Airtable
 - ✅ Conexión API en tiempo real
 - ✅ Actualización automática de productos
 - ✅ Manejo robusto de errores
 - ✅ Cache optimizado para performance
+
+#### n8n (IA)
+- ✅ Webhook de producción configurado
+- ✅ Procesamiento de consultas en tiempo real
+- ✅ Respuestas contextuales sobre perfumes
+- ✅ Logging completo para monitoreo
 
 ## 🚀 Demo en Vivo
 

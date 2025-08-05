@@ -24,19 +24,45 @@ export function useCart() {
   }, [cartItems]);
 
   const addToCart = (product: Product, quantity: number = 1) => {
+    // Validar que hay stock disponible
+    if (product.existenciaActual <= 0) {
+      console.warn(`No hay stock disponible para ${product.descripcion}`);
+      return false;
+    }
+
     setCartItems(prevItems => {
       const existingItem = prevItems.find(item => item.product.id === product.id);
       
       if (existingItem) {
+        // Validar que no excedamos el stock disponible
+        const newQuantity = existingItem.quantity + quantity;
+        if (newQuantity > product.existenciaActual) {
+          console.warn(`Stock insuficiente. Disponible: ${product.existenciaActual}, En carrito: ${existingItem.quantity}`);
+          // Agregar solo la cantidad disponible
+          const maxCanAdd = product.existenciaActual - existingItem.quantity;
+          if (maxCanAdd > 0) {
+            return prevItems.map(item =>
+              item.product.id === product.id
+                ? { ...item, quantity: product.existenciaActual }
+                : item
+            );
+          }
+          return prevItems; // No se puede agregar más
+        }
+        
         return prevItems.map(item =>
           item.product.id === product.id
-            ? { ...item, quantity: item.quantity + quantity }
+            ? { ...item, quantity: newQuantity }
             : item
         );
       } else {
-        return [...prevItems, { product, quantity }];
+        // Validar que la cantidad inicial no exceda el stock
+        const finalQuantity = Math.min(quantity, product.existenciaActual);
+        return [...prevItems, { product, quantity: finalQuantity }];
       }
     });
+    
+    return true;
   };
 
   const removeFromCart = (productId: string) => {
@@ -46,16 +72,25 @@ export function useCart() {
   const updateQuantity = (productId: string, quantity: number) => {
     if (quantity <= 0) {
       removeFromCart(productId);
-      return;
+      return true;
     }
 
     setCartItems(prevItems =>
-      prevItems.map(item =>
-        item.product.id === productId
-          ? { ...item, quantity }
-          : item
-      )
+      prevItems.map(item => {
+        if (item.product.id === productId) {
+          // Validar que no excedamos el stock disponible
+          if (quantity > item.product.existenciaActual) {
+            console.warn(`Stock insuficiente. Disponible: ${item.product.existenciaActual}, Solicitado: ${quantity}`);
+            // Usar la cantidad máxima disponible
+            return { ...item, quantity: item.product.existenciaActual };
+          }
+          return { ...item, quantity };
+        }
+        return item;
+      })
     );
+    
+    return true;
   };
 
   const clearCart = () => {

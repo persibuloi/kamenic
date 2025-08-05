@@ -100,7 +100,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onClose, onAddTo
               <span className="stock-label">Disponibilidad:</span>
               <span className={`stock-value ${product.existenciaActual > 0 ? 'in-stock' : 'out-of-stock'}`}>
                 {product.existenciaActual > 0 
-                  ? `${product.existenciaActual} unidades disponibles`
+                  ? 'Disponible'
                   : 'Agotado'
                 }
               </span>

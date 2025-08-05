@@ -81,14 +81,22 @@ export function CartModal({ isOpen, onClose }: CartModalProps) {
                         <div className="flex items-center space-x-2">
                           <button
                             onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                            className="p-1 hover:bg-gray-200 rounded transition-colors duration-200"
+                            disabled={item.quantity <= 1}
+                            className="p-1 hover:bg-gray-200 rounded transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <Minus className="h-3 w-3" />
                           </button>
                           <span className="w-8 text-center font-medium">{item.quantity}</span>
                           <button
-                            onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                            className="p-1 hover:bg-gray-200 rounded transition-colors duration-200"
+                            onClick={() => {
+                              const success = updateQuantity(item.product.id, item.quantity + 1);
+                              if (!success) {
+                                alert('No se puede agregar más cantidad de este producto.');
+                              }
+                            }}
+                            disabled={item.quantity >= item.product.existenciaActual}
+                            className="p-1 hover:bg-gray-200 rounded transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                            title={item.quantity >= item.product.existenciaActual ? 'Cantidad máxima alcanzada' : 'Aumentar cantidad'}
                           >
                             <Plus className="h-3 w-3" />
                           </button>
