@@ -214,15 +214,10 @@ export function HeaderChatbot({ isOpen, onClose, webhookUrl }: HeaderChatbotProp
       {/* Overlay para móviles */}
       <div className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40" onClick={onClose}></div>
       
-      {/* Modal del chatbot - Responsive */}
-      <div className="
-        fixed inset-0 z-50 md:absolute md:top-full md:right-0 md:inset-auto md:mt-2 
-        w-full h-full md:w-96 md:h-[480px] md:right-0
-        bg-white rounded-none md:rounded-lg shadow-2xl border-0 md:border border-gray-200 flex flex-col
-        md:max-h-[calc(100vh-120px)]
-      ">
+      {/* Contenedor principal del chatbot - Responsive */}
+      <div className="fixed top-16 right-2 left-2 bottom-20 z-50 bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col overflow-hidden md:fixed md:top-16 md:right-4 md:left-auto md:bottom-auto md:w-[400px] md:h-[400px]">
         {/* Header del chatbot - Responsive */}
-        <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white p-4 md:p-4 pt-8 md:pt-4 rounded-none md:rounded-t-lg flex items-center justify-between">
+        <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white p-3 md:p-4 rounded-t-lg flex items-center justify-between flex-shrink-0">
           <div className="flex items-center space-x-3">
             <div className="relative">
               <Bot className="h-6 w-6 md:h-6 md:w-6 ai-pulse" />
@@ -242,14 +237,14 @@ export function HeaderChatbot({ isOpen, onClose, webhookUrl }: HeaderChatbotProp
         </div>
 
         {/* Área de mensajes - Responsive */}
-        <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4 bg-gradient-to-b from-gray-50 to-white">
+        <div className="flex-1 overflow-y-auto p-2 md:p-4 space-y-2 md:space-y-3 bg-gradient-to-b from-gray-50 to-white">
           {messages.map((message) => (
             <div
               key={message.id}
               className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[85%] md:max-w-xs lg:max-w-md px-3 md:px-4 py-2 md:py-2 rounded-2xl ${
+                className={`max-w-[80%] md:max-w-xs lg:max-w-md px-2 md:px-3 py-1.5 md:py-2 rounded-2xl ${
                   message.isUser
                     ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white'
                     : 'bg-white border border-gray-200 text-gray-800 shadow-sm'
@@ -281,7 +276,7 @@ export function HeaderChatbot({ isOpen, onClose, webhookUrl }: HeaderChatbotProp
         </div>
 
         {/* Input de mensaje - Responsive */}
-        <div className="p-3 md:p-4 border-t border-gray-200 bg-white rounded-none md:rounded-b-lg safe-area-padding-bottom">
+        <div className="p-2 md:p-4 border-t border-gray-200 bg-white rounded-b-lg flex-shrink-0">
           <div className="flex space-x-2">
             <textarea
               ref={inputRef}
@@ -289,16 +284,16 @@ export function HeaderChatbot({ isOpen, onClose, webhookUrl }: HeaderChatbotProp
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Pregúntame sobre perfumes..."
-              className="flex-1 resize-none border border-gray-300 rounded-lg px-3 py-2 md:px-3 md:py-2 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm md:text-sm min-h-[40px]"
+              className="flex-1 resize-none border border-gray-300 rounded-lg px-2 py-2 md:px-3 md:py-2 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm min-h-[36px] md:min-h-[40px]"
               rows={1}
               disabled={isLoading}
             />
             <button
               onClick={sendMessage}
               disabled={!inputValue.trim() || isLoading}
-              className="bg-gradient-to-r from-amber-500 to-amber-600 text-white p-2 md:p-2 rounded-lg hover:from-amber-600 hover:to-amber-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center min-w-[40px]"
+              className="bg-gradient-to-r from-amber-500 to-amber-600 text-white p-2 rounded-lg hover:from-amber-600 hover:to-amber-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center min-w-[36px] md:min-w-[40px]"
             >
-              <Send className="h-4 w-4 md:h-4 md:w-4" />
+              <Send className="h-3 w-3 md:h-4 md:w-4" />
             </button>
           </div>
           <p className="text-xs text-gray-500 mt-2 hidden md:block">

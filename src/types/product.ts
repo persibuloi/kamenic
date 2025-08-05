@@ -10,6 +10,7 @@ export interface Product {
   codigoKame: string;
   imagen?: string;
   existenciaActual: number;
+  destacado?: boolean;
 }
 
 export interface AirtableRecord {
@@ -25,6 +26,7 @@ export interface AirtableRecord {
     'Código KAME': string;
     'Foto'?: any;
     'Existencia Actual': number;
+    'Destacado'?: boolean;
     [key: string]: any; // Para compatibilidad con variaciones de nombres
   };
   createdTime: string;

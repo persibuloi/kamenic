@@ -26,6 +26,7 @@ function transformAirtableRecord(record: AirtableRecord): Product {
   const genero = getGeneroValue(record.fields);
   const existenciaActual = getExistenciaValue(record.fields);
   const codigoKame = getCodigoKameValue(record.fields);
+  const destacado = getDestacadoValue(record.fields);
 
   const descripcionLarga = getDescripcionLargaValue(record.fields);
 
@@ -40,7 +41,8 @@ function transformAirtableRecord(record: AirtableRecord): Product {
     genero,
     codigoKame,
     imagen,
-    existenciaActual
+    existenciaActual,
+    destacado
   };
 
   // Log para debugging - solo en desarrollo
@@ -255,6 +257,24 @@ function getExistenciaValue(fields: any): number {
   }
   
   return 0; // Valor por defecto
+}
+
+// Función auxiliar para obtener el valor de destacado
+function getDestacadoValue(fields: any): boolean {
+  const destacadoFields = ['Destacado', 'destacado', 'DESTACADO', 'Destacar'];
+  
+  for (const fieldName of destacadoFields) {
+    const fieldValue = fields[fieldName];
+    if (typeof fieldValue === 'boolean') {
+      return fieldValue;
+    } else if (fieldValue === 'true' || fieldValue === '1' || fieldValue === 1) {
+      return true;
+    } else if (fieldValue === 'false' || fieldValue === '0' || fieldValue === 0) {
+      return false;
+    }
+  }
+  
+  return false; // Valor por defecto
 }
 
 // Función auxiliar para obtener el valor de imagen de manera robusta

@@ -91,7 +91,7 @@ export function Header({ onCartClick, webhookUrl }: HeaderProps) {
               
               {/* Barra de búsqueda desplegable */}
               {isSearchOpen && (
-                <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 p-4 z-50">
+                <div className="absolute top-full right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-lg shadow-xl border border-gray-200 p-4 z-50 md:right-0 -right-2 md:w-80">
                   <form onSubmit={handleSearch} className="flex gap-2">
                     <input
                       type="text"

@@ -1,5 +1,5 @@
-import React from 'react';
-import { ShoppingBag, Heart, Star } from 'lucide-react';
+import React, { useState } from 'react';
+import { ShoppingBag, Heart, Star, Share2, MessageCircle, Copy, Facebook, Twitter } from 'lucide-react';
 import { Product } from '../types/product';
 import { useCartContext } from '../context/CartContext';
 import { useFavoritesContext } from '../context/FavoritesContext';
@@ -46,6 +46,67 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
     }
   };
 
+  // Estado para mostrar/ocultar menú de compartir
+  const [showShareMenu, setShowShareMenu] = useState(false);
+
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowShareMenu(!showShareMenu);
+  };
+
+  // Generar texto para compartir
+  const generateShareText = () => {
+    const priceText = hasOffer 
+      ? `¡OFERTA! $${displayPrice?.toLocaleString('es-CO')} (antes $${product.precio1.toLocaleString('es-CO')}) - ¡${discount}% de descuento!`
+      : `$${displayPrice?.toLocaleString('es-CO')}`;
+    
+    return `🌟 ${product.descripcion}\n\n💰 ${priceText}\n🏷️ Código: ${product.codigoKame}\n🔥 ${product.tipoMarca}\n\n¡Descubre esta increíble fragancia en Essence Luxe!\n\n🛒 Visita: ${window.location.origin}`;
+  };
+
+  const shareToWhatsApp = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const text = generateShareText();
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(whatsappUrl, '_blank');
+    setShowShareMenu(false);
+  };
+
+  const copyToClipboard = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const text = generateShareText();
+    try {
+      await navigator.clipboard.writeText(text);
+      alert('¡Información copiada al portapapeles!');
+    } catch (err) {
+      // Fallback para navegadores que no soportan clipboard API
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      alert('¡Información copiada al portapapeles!');
+    }
+    setShowShareMenu(false);
+  };
+
+  const shareToFacebook = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const url = window.location.origin;
+    const text = `${product.descripcion} - ${hasOffer ? `¡OFERTA! $${displayPrice?.toLocaleString('es-CO')}` : `$${displayPrice?.toLocaleString('es-CO')}`}`;
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`;
+    window.open(facebookUrl, '_blank');
+    setShowShareMenu(false);
+  };
+
+  const shareToTwitter = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const text = `🌟 ${product.descripcion} ${hasOffer ? `¡OFERTA! $${displayPrice?.toLocaleString('es-CO')} (${discount}% OFF)` : `$${displayPrice?.toLocaleString('es-CO')}`} en @EssenceLuxe`;
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.origin)}`;
+    window.open(twitterUrl, '_blank');
+    setShowShareMenu(false);
+  };
+
   return (
     <div className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden border border-amber-50">
       {/* Etiqueta de oferta */}
@@ -55,22 +116,70 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
         </div>
       )}
 
-      {/* Botón de favoritos */}
-      <button 
-        onClick={handleToggleFavorite}
-        className={`absolute top-4 right-4 z-10 p-2 backdrop-blur-sm rounded-full shadow-lg transition-all duration-200 group-hover:scale-110 ${
-          isProductFavorite 
-            ? 'bg-red-50 hover:bg-red-100' 
-            : 'bg-white/80 hover:bg-white'
-        }`}
-        title={isProductFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
-      >
-        <Heart className={`h-4 w-4 transition-colors duration-200 ${
-          isProductFavorite 
-            ? 'text-red-500 fill-current' 
-            : 'text-gray-600 hover:text-red-500'
-        }`} />
-      </button>
+      {/* Botones de acción superiores */}
+      <div className="absolute top-4 right-4 z-10 flex space-x-2">
+        {/* Botón de compartir */}
+        <div className="relative">
+          <button 
+            onClick={handleShare}
+            className="p-2 bg-white/80 hover:bg-white backdrop-blur-sm rounded-full shadow-lg transition-all duration-200 group-hover:scale-110"
+            title="Compartir producto"
+          >
+            <Share2 className="h-4 w-4 text-gray-600 hover:text-blue-500 transition-colors duration-200" />
+          </button>
+          
+          {/* Menú de compartir */}
+          {showShareMenu && (
+            <div className="absolute top-12 right-0 bg-white rounded-xl shadow-xl border border-gray-200 py-2 min-w-[200px] z-20">
+              <button
+                onClick={shareToWhatsApp}
+                className="w-full px-4 py-2 text-left hover:bg-green-50 flex items-center space-x-3 transition-colors duration-200"
+              >
+                <MessageCircle className="h-4 w-4 text-green-600" />
+                <span className="text-sm text-gray-700">WhatsApp</span>
+              </button>
+              <button
+                onClick={copyToClipboard}
+                className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center space-x-3 transition-colors duration-200"
+              >
+                <Copy className="h-4 w-4 text-gray-600" />
+                <span className="text-sm text-gray-700">Copiar información</span>
+              </button>
+              <button
+                onClick={shareToFacebook}
+                className="w-full px-4 py-2 text-left hover:bg-blue-50 flex items-center space-x-3 transition-colors duration-200"
+              >
+                <Facebook className="h-4 w-4 text-blue-600" />
+                <span className="text-sm text-gray-700">Facebook</span>
+              </button>
+              <button
+                onClick={shareToTwitter}
+                className="w-full px-4 py-2 text-left hover:bg-sky-50 flex items-center space-x-3 transition-colors duration-200"
+              >
+                <Twitter className="h-4 w-4 text-sky-600" />
+                <span className="text-sm text-gray-700">Twitter</span>
+              </button>
+            </div>
+          )}
+        </div>
+        
+        {/* Botón de favoritos */}
+        <button 
+          onClick={handleToggleFavorite}
+          className={`p-2 backdrop-blur-sm rounded-full shadow-lg transition-all duration-200 group-hover:scale-110 ${
+            isProductFavorite 
+              ? 'bg-red-50 hover:bg-red-100' 
+              : 'bg-white/80 hover:bg-white'
+          }`}
+          title={isProductFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+        >
+          <Heart className={`h-4 w-4 transition-colors duration-200 ${
+            isProductFavorite 
+              ? 'text-red-500 fill-current' 
+              : 'text-gray-600 hover:text-red-500'
+          }`} />
+        </button>
+      </div>
 
       {/* Imagen del producto */}
       <div className="relative h-64 bg-gradient-to-br from-amber-50 to-amber-100 overflow-hidden">

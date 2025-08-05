@@ -3,6 +3,7 @@ import { Sparkles, Award, Truck, Shield } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { LoadingSpinner, ProductGridSkeleton } from '../components/LoadingSpinner';
 import ProductDetail from '../components/ProductDetail';
+import { WeeklyDeal } from '../components/WeeklyDeal';
 import { useAirtable } from '../hooks/useAirtable';
 import { Product } from '../types/product';
 
@@ -20,9 +21,9 @@ export function HomePage() {
     return shuffled;
   };
 
-  // Productos destacados - rotación aleatoria de productos en oferta
+  // Productos en ofertas - solo productos con precio de oferta
   const displayProducts = useMemo(() => {
-    // Obtener todos los productos en oferta
+    // Obtener SOLO productos en oferta (con precio de oferta válido)
     const offerProducts = products.filter(product =>
       typeof product.precioOferta === 'number' &&
       typeof product.precio1 === 'number' &&
@@ -30,24 +31,8 @@ export function HomePage() {
       product.existenciaActual > 0 // Solo productos con stock
     );
 
-    // Si hay productos en oferta, mostrar 4 aleatorios
-    if (offerProducts.length >= 4) {
-      return shuffleArray(offerProducts).slice(0, 4);
-    }
-    // Si hay menos de 4 ofertas, completar con productos regulares aleatorios
-    else if (offerProducts.length > 0) {
-      const regularProducts = products.filter(product => 
-        product.existenciaActual > 0 &&
-        !offerProducts.includes(product)
-      );
-      const shuffledRegular = shuffleArray(regularProducts);
-      return [...offerProducts, ...shuffledRegular].slice(0, 4);
-    }
-    // Si no hay ofertas, mostrar 4 productos aleatorios con stock
-    else {
-      const availableProducts = products.filter(product => product.existenciaActual > 0);
-      return shuffleArray(availableProducts).slice(0, 4);
-    }
+    // Mostrar hasta 8 productos en oferta (más productos para mostrar más ofertas)
+    return shuffleArray(offerProducts).slice(0, 8);
   }, [products]); // Se recalcula cada vez que cambian los productos
 
   return (
@@ -92,7 +77,7 @@ export function HomePage() {
                   href="#featured" 
                   className="border-2 border-amber-600 text-amber-600 hover:bg-amber-600 hover:text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-200"
                 >
-                  Ver Destacados
+                  🔥 Productos en Ofertas
                 </a>
               </div>
             </div>
@@ -114,6 +99,9 @@ export function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Producto de la Semana */}
+      <WeeklyDeal products={products} />
 
       {/* Características */}
       <section className="py-16 bg-white">
@@ -156,10 +144,10 @@ export function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Productos Destacados
+              🔥 Productos en Ofertas
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Descubre nuestras fragancias más populares y ofertas especiales
+              ¡Aprovecha nuestros descuentos especiales! Fragancias de calidad a precios increíbles
             </p>
           </div>
 
@@ -175,7 +163,7 @@ export function HomePage() {
           {loading ? (
             <ProductGridSkeleton />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {displayProducts.map((product) => (
                 <ProductCard 
                   key={product.id} 
@@ -188,7 +176,10 @@ export function HomePage() {
 
           {!loading && !error && displayProducts.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">No hay productos disponibles</p>
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-8 max-w-md mx-auto">
+                <p className="text-amber-700 font-medium mb-2">🚨 No hay ofertas disponibles</p>
+                <p className="text-amber-600 text-sm">Actualmente no tenemos productos en oferta, pero revisa nuestro catálogo completo</p>
+              </div>
             </div>
           )}
 
@@ -197,7 +188,7 @@ export function HomePage() {
               href="#catalog" 
               className="inline-flex items-center bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
-              Ver Todo el Catálogo
+              Ver Más Ofertas en el Catálogo
               <svg className="ml-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
