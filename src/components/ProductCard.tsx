@@ -182,7 +182,7 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
       </div>
 
       {/* Imagen del producto */}
-      <div className="relative h-64 bg-gradient-to-br from-amber-50 to-amber-100 overflow-hidden">
+      <div className="relative h-48 sm:h-64 bg-gradient-to-br from-amber-50 to-amber-100 overflow-hidden">
         <img
           src={product.imagen}
           alt={product.descripcion}
@@ -196,9 +196,9 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
       </div>
 
       {/* Contenido del producto */}
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         {/* Tipo de marca */}
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-2 sm:mb-3">
           <span className="inline-block bg-gradient-to-r from-amber-100 to-amber-200 text-amber-800 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide">
             {product.tipoMarca}
           </span>
@@ -210,23 +210,23 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
         </div>
 
         {/* Nombre del producto */}
-        <h3 className="font-bold text-lg text-gray-900 mb-2 line-clamp-2 group-hover:text-amber-700 transition-colors duration-200">
+        <h3 className="font-bold text-base sm:text-lg text-gray-900 mb-2 line-clamp-2 group-hover:text-amber-700 transition-colors duration-200">
           {product.descripcion}
         </h3>
 
         {/* Código */}
-        <p className="text-xs text-gray-500 mb-4 font-mono">
+        <p className="text-xs text-gray-500 mb-3 sm:mb-4 font-mono">
           Código: {product.codigoKame}
         </p>
 
         {/* Precios */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
           <div className="flex items-center space-x-2">
-            <span className="text-2xl font-bold text-gray-900">
+            <span className="text-xl sm:text-2xl font-bold text-gray-900">
               ${displayPrice?.toLocaleString('es-CO')}
             </span>
             {hasOffer && (
-              <span className="text-lg text-gray-500 line-through">
+              <span className="text-base sm:text-lg text-gray-500 line-through">
                 ${product.precio1.toLocaleString('es-CO')}
               </span>
             )}

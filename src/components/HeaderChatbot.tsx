@@ -215,17 +215,17 @@ export function HeaderChatbot({ isOpen, onClose, webhookUrl }: HeaderChatbotProp
       <div className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40" onClick={onClose}></div>
       
       {/* Contenedor principal del chatbot - Responsive */}
-      <div className="fixed top-16 right-2 left-2 bottom-20 z-50 bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col overflow-hidden md:fixed md:top-16 md:right-4 md:left-auto md:bottom-auto md:w-[400px] md:h-[400px]">
+      <div className="fixed top-16 right-3 left-3 bottom-24 z-50 bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col overflow-hidden max-h-[60vh] md:fixed md:top-16 md:right-4 md:left-auto md:bottom-auto md:w-[400px] md:h-[400px]">
         {/* Header del chatbot - Responsive */}
-        <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white p-3 md:p-4 rounded-t-lg flex items-center justify-between flex-shrink-0">
+        <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white p-2 md:p-4 rounded-t-lg flex items-center justify-between flex-shrink-0">
           <div className="flex items-center space-x-3">
             <div className="relative">
               <Bot className="h-6 w-6 md:h-6 md:w-6 ai-pulse" />
               <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white ai-glow"></div>
             </div>
             <div>
-              <h3 className="font-semibold text-lg md:text-lg">Asistente IA de Fragancias</h3>
-              <p className="text-amber-100 text-sm md:text-sm">Especialista en perfumes • En línea</p>
+              <h3 className="font-semibold text-base md:text-lg">Asistente IA</h3>
+              <p className="text-amber-100 text-xs md:text-sm">Especialista en perfumes</p>
             </div>
           </div>
           <button
@@ -237,7 +237,7 @@ export function HeaderChatbot({ isOpen, onClose, webhookUrl }: HeaderChatbotProp
         </div>
 
         {/* Área de mensajes - Responsive */}
-        <div className="flex-1 overflow-y-auto p-2 md:p-4 space-y-2 md:space-y-3 bg-gradient-to-b from-gray-50 to-white">
+        <div className="flex-1 overflow-y-auto p-2 md:p-4 space-y-2 md:space-y-4 bg-gray-50">
           {messages.map((message) => (
             <div
               key={message.id}
@@ -284,7 +284,7 @@ export function HeaderChatbot({ isOpen, onClose, webhookUrl }: HeaderChatbotProp
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Pregúntame sobre perfumes..."
-              className="flex-1 resize-none border border-gray-300 rounded-lg px-2 py-2 md:px-3 md:py-2 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm min-h-[36px] md:min-h-[40px]"
+              className="flex-1 resize-none border border-gray-300 rounded-lg px-2 py-1 md:px-3 md:py-2 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm min-h-[32px] md:min-h-[40px]"
               rows={1}
               disabled={isLoading}
             />

@@ -100,16 +100,16 @@ export function WeeklyDeal({ products }: WeeklyDealProps) {
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header de la sección */}
-          <div className="text-center mb-12">
+          <div className="text-center mb-8 sm:mb-12">
             <div className="inline-flex items-center bg-gradient-to-r from-red-500 to-orange-500 text-white px-6 py-2 rounded-full font-bold text-sm mb-4 animate-pulse">
               <Zap className="h-4 w-4 mr-2" />
               {featuredProducts.length > 0 ? 'PRODUCTOS DESTACADOS' : 'PRODUCTO RECOMENDADO'}
               <Zap className="h-4 w-4 ml-2" />
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               {hasMultipleProducts ? '¡Productos Destacados!' : '¡Producto Destacado!'}
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
               {hasMultipleProducts ? 'Desliza para ver nuestros productos especiales seleccionados para ti' : 'Producto especial seleccionado con el mejor precio para ti'}
             </p>
             {hasMultipleProducts && (
@@ -126,13 +126,13 @@ export function WeeklyDeal({ products }: WeeklyDealProps) {
               <>
                 <button
                   onClick={prevSlide}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-gray-700 p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 backdrop-blur-sm"
+                  className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-gray-700 p-2 sm:p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 backdrop-blur-sm"
                 >
                   <ChevronLeft className="h-6 w-6" />
                 </button>
                 <button
                   onClick={nextSlide}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-gray-700 p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 backdrop-blur-sm"
+                  className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-gray-700 p-2 sm:p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 backdrop-blur-sm"
                 >
                   <ChevronRight className="h-6 w-6" />
                 </button>
