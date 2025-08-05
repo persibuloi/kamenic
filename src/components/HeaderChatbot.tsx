@@ -215,7 +215,7 @@ export function HeaderChatbot({ isOpen, onClose, webhookUrl }: HeaderChatbotProp
       <div className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40" onClick={onClose}></div>
       
       {/* Contenedor principal del chatbot - Responsive */}
-      <div className="fixed top-16 right-6 left-6 bottom-24 z-50 bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col overflow-hidden max-h-[60vh] md:fixed md:top-16 md:right-4 md:left-auto md:bottom-auto md:w-[400px] md:h-[400px]">
+      <div className="fixed top-20 right-8 left-8 bottom-32 z-50 bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col overflow-hidden max-h-[50vh] max-w-[85vw] mx-auto md:fixed md:top-16 md:right-4 md:left-auto md:bottom-auto md:w-[400px] md:h-[400px]">
         {/* Header del chatbot - Responsive */}
         <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white p-2 md:p-4 rounded-t-lg flex items-center justify-between flex-shrink-0">
           <div className="flex items-center space-x-3">
@@ -237,7 +237,7 @@ export function HeaderChatbot({ isOpen, onClose, webhookUrl }: HeaderChatbotProp
         </div>
 
         {/* Área de mensajes - Responsive */}
-        <div className="flex-1 overflow-y-auto p-2 md:p-4 space-y-2 md:space-y-4 bg-gray-50">
+        <div className="flex-1 overflow-y-auto p-1 md:p-4 space-y-1 md:space-y-4 bg-gray-50">
           {messages.map((message) => (
             <div
               key={message.id}
@@ -276,8 +276,8 @@ export function HeaderChatbot({ isOpen, onClose, webhookUrl }: HeaderChatbotProp
         </div>
 
         {/* Input de mensaje - Responsive */}
-        <div className="p-2 md:p-4 border-t border-gray-200 bg-white rounded-b-lg flex-shrink-0">
-          <div className="flex space-x-2">
+        <div className="p-1 md:p-4 border-t border-gray-200 bg-white rounded-b-lg flex-shrink-0">
+          <div className="flex space-x-1 md:space-x-2">
             <textarea
               ref={inputRef}
               value={inputValue}
