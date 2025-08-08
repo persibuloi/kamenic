@@ -51,6 +51,8 @@
 
 🌐 **[Ver Demo](https://your-vercel-url.vercel.app)** (Reemplaza con tu URL de Vercel)
 
+> **Última actualización:** 2025-08-08 - Token de Airtable actualizado
+
 ## 📦 Instalación Rápida
 
 ### Prerrequisitos
