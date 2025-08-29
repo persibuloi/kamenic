@@ -142,6 +142,17 @@ export function CatalogPage() {
       const hash = window.location.hash;
       console.log('CatalogPage - Hash actual:', hash);
       
+      // 1) Abrir modal si el hash tiene #producto=<id>
+      const productMatch = hash.match(/^#producto=([^?]+)/);
+      if (productMatch && uniqueProducts.length > 0) {
+        const id = productMatch[1];
+        const prod = uniqueProducts.find(p => p.id === id);
+        if (prod) {
+          setSelectedProduct(prod);
+        }
+      }
+
+      // 2) Leer parámetros de búsqueda después del '?'
       const searchParams = new URLSearchParams(hash.split('?')[1] || '');
       const searchFromUrl = searchParams.get('search');
       
@@ -437,7 +448,10 @@ export function CatalogPage() {
                     <ProductCard 
                       key={product.id} 
                       product={product} 
-                      onClick={() => setSelectedProduct(product)}
+                      onClick={() => {
+                        setSelectedProduct(product);
+                        window.location.hash = `producto=${product.id}`;
+                      }}
                     />
                   ))}
                 </div>
@@ -503,7 +517,14 @@ export function CatalogPage() {
         {selectedProduct && (
           <ProductDetail
             product={selectedProduct}
-            onClose={() => setSelectedProduct(null)}
+            onClose={() => {
+              setSelectedProduct(null);
+              if (window.history.replaceState) {
+                window.history.replaceState(null, '', window.location.pathname + window.location.search);
+              } else {
+                window.location.hash = '';
+              }
+            }}
             onAddToCart={(product) => {
               // Aquí puedes agregar lógica del carrito si tienes un contexto
               console.log('Agregar al carrito:', product);

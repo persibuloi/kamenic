@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Sparkles, Award, Truck, Shield } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { LoadingSpinner, ProductGridSkeleton } from '../components/LoadingSpinner';
@@ -10,6 +10,29 @@ import { Product } from '../types/product';
 export function HomePage() {
   const { products, loading, error } = useAirtable();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  
+  // Abrir modal desde hash #producto=<id> y escuchar cambios del hash
+  useEffect(() => {
+    const openFromHash = () => {
+      const hash = window.location.hash;
+      const match = hash.match(/^#producto=(.+)$/);
+      if (match && products.length > 0) {
+        const id = match[1];
+        const prod = products.find(p => p.id === id);
+        if (prod) setSelectedProduct(prod);
+      }
+    };
+
+    // Intento inicial (cuando ya hay productos)
+    if (products.length > 0) {
+      openFromHash();
+    }
+
+    // Listener para cambios posteriores del hash
+    const onHashChange = () => openFromHash();
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, [products]);
   
   // Función para mezclar array aleatoriamente (Fisher-Yates shuffle)
   const shuffleArray = (array: Product[]) => {
@@ -168,7 +191,10 @@ export function HomePage() {
                 <ProductCard 
                   key={product.id} 
                   product={product} 
-                  onClick={() => setSelectedProduct(product)}
+                  onClick={() => {
+                    setSelectedProduct(product);
+                    window.location.hash = `producto=${product.id}`;
+                  }}
                 />
               ))}
             </div>
@@ -224,7 +250,15 @@ export function HomePage() {
       {selectedProduct && (
         <ProductDetail
           product={selectedProduct}
-          onClose={() => setSelectedProduct(null)}
+          onClose={() => {
+            setSelectedProduct(null);
+            // Limpiar el hash sin recargar
+            if (window.history.replaceState) {
+              window.history.replaceState(null, '', window.location.pathname + window.location.search);
+            } else {
+              window.location.hash = '';
+            }
+          }}
           onAddToCart={(product) => {
             console.log('Agregar al carrito:', product);
             setSelectedProduct(null);
