@@ -6,6 +6,7 @@ import { CartModal } from './components/CartModal';
 import { HomePage } from './pages/HomePage';
 import { CatalogPage } from './pages/CatalogPage';
 import { ContactPage } from './pages/ContactPage';
+import { DistributorsPage } from './pages/DistributorsPage';
 import { CartProvider } from './context/CartContext';
 import { FavoritesProvider } from './context/FavoritesContext';
 import { useContact } from './hooks/useContact';
@@ -13,7 +14,7 @@ import { useContact } from './hooks/useContact';
 // Importación lazy del blog para evitar problemas
 const BlogPage = React.lazy(() => import('./pages/BlogPage'));
 
-type Page = 'home' | 'catalog' | 'contact' | 'blog';
+type Page = 'home' | 'catalog' | 'contact' | 'blog' | 'distributors';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -46,6 +47,9 @@ function App() {
           break;
         case 'contact':
           setCurrentPage('contact');
+          break;
+        case 'distributors':
+          setCurrentPage('distributors');
           break;
         case 'blog':
           setCurrentPage('blog');
@@ -80,6 +84,9 @@ function App() {
         </div>
         <div className={currentPage === 'contact' ? 'block' : 'hidden'}>
           <ContactPage />
+        </div>
+        <div className={currentPage === 'distributors' ? 'block' : 'hidden'}>
+          <DistributorsPage />
         </div>
         <div className={currentPage === 'blog' ? 'block' : 'hidden'}>
           <React.Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50 to-orange-50"></div>}>

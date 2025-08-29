@@ -69,6 +69,7 @@ export function Footer() {
               <li><a href="#catalog" className="text-gray-300 hover:text-white transition-colors duration-200">Catálogo</a></li>
               <li><a href="#featured" className="text-gray-300 hover:text-white transition-colors duration-200">Destacados</a></li>
               <li><a href="#contact" className="text-gray-300 hover:text-white transition-colors duration-200">Contacto</a></li>
+              <li><a href="#distributors" className="text-gray-400 hover:text-amber-400 transition-colors duration-200">Distribuidores</a></li>
             </ul>
           </div>
 

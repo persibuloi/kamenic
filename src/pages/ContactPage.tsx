@@ -47,6 +47,8 @@ export function ContactPage() {
       Email: form.email,
       Asunto: form.subject,
       mensaje: form.message,
+      Phone: form.phone || undefined,
+      Tipo: 'Contacto',
     };
     const result = await sendWebMessageToAirtable(data);
     if (result.success) {
