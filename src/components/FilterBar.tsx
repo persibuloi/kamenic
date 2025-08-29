@@ -101,16 +101,17 @@ export function FilterBar({ filters, onFiltersChange, availableBrands, available
       </div>
 
       {/* Chips de filtros rápidos (solo móvil) */}
-      <div className="md:hidden -mx-2 px-2">
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+      <div className="md:hidden sticky top-16 sm:top-2 z-20 -mx-3 px-3 py-2 bg-white/80 backdrop-blur-md rounded-xl border border-amber-100">
+        <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-1 snap-x snap-mandatory scroll-px-3">
           {/* Solo ofertas */}
           <button
             type="button"
             onClick={handleOffersToggle}
-            className={`whitespace-nowrap px-3 py-1.5 rounded-full text-sm border ${
+            aria-pressed={filters.showOnlyOffers}
+            className={`shrink-0 snap-start whitespace-nowrap px-3.5 py-2 rounded-full text-[13px] border shadow-sm transition-colors ${
               filters.showOnlyOffers
-                ? 'bg-red-600 text-white border-red-600'
-                : 'bg-white text-gray-700 border-gray-300'
+                ? 'bg-gradient-to-r from-red-500 to-red-600 text-white border-red-600 shadow-md'
+                : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
             }`}
           >
             🔥 Ofertas
@@ -122,12 +123,14 @@ export function FilterBar({ filters, onFiltersChange, availableBrands, available
               key={g}
               type="button"
               onClick={() => handleGenderChange(filters.genero === g ? '' : g)}
-              className={`whitespace-nowrap px-3 py-1.5 rounded-full text-sm border ${
+              aria-pressed={filters.genero === g}
+              className={`shrink-0 snap-start whitespace-nowrap px-3.5 py-2 rounded-full text-[13px] border shadow-sm transition-colors ${
                 filters.genero === g
-                  ? 'bg-amber-600 text-white border-amber-600'
-                  : 'bg-white text-gray-700 border-gray-300'
+                  ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-white border-amber-600 shadow-md'
+                  : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
               }`}
             >
+              <Filter className="inline-block h-3 w-3 mr-1 opacity-80" />
               {g}
             </button>
           ))}
@@ -138,12 +141,14 @@ export function FilterBar({ filters, onFiltersChange, availableBrands, available
               key={t}
               type="button"
               onClick={() => handleTipoMarcaChange(filters.tipoMarca === t ? '' : t)}
-              className={`whitespace-nowrap px-3 py-1.5 rounded-full text-sm border ${
+              aria-pressed={filters.tipoMarca === t}
+              className={`shrink-0 snap-start whitespace-nowrap px-3.5 py-2 rounded-full text-[13px] border shadow-sm transition-colors ${
                 filters.tipoMarca === t
-                  ? 'bg-amber-600 text-white border-amber-600'
-                  : 'bg-white text-gray-700 border-gray-300'
+                  ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-white border-amber-600 shadow-md'
+                  : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
               }`}
             >
+              <Filter className="inline-block h-3 w-3 mr-1 opacity-80" />
               {t}
             </button>
           ))}
@@ -151,9 +156,9 @@ export function FilterBar({ filters, onFiltersChange, availableBrands, available
       </div>
 
       {/* Versión completa para md+ */}
-      <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+      <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 lg:gap-6">
         {/* Buscador */}
-        <div className="relative">
+        <div className="relative lg:col-span-4">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <input
             type="text"
@@ -165,12 +170,12 @@ export function FilterBar({ filters, onFiltersChange, availableBrands, available
         </div>
 
         {/* Filtro por Marca */}
-        <div className="relative">
+        <div className="relative lg:col-span-3">
           <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <select
             value={filters.marca || ''}
             onChange={(e) => handleBrandChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 appearance-none"
+            className="w-full pl-10 pr-6 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 appearance-none text-sm min-w-[200px]"
           >
             <option value="">Todas las marcas</option>
             {availableBrands.map((brand) => (
@@ -182,12 +187,13 @@ export function FilterBar({ filters, onFiltersChange, availableBrands, available
         </div>
 
         {/* Filtro por Tipo de Marca */}
-        <div className="relative">
+        <div className="relative lg:col-span-2">
           <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <select
             value={filters.tipoMarca || ''}
             onChange={(e) => handleTipoMarcaChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 appearance-none"
+            className="w-full pl-10 pr-6 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 appearance-none text-sm min-w-[160px]"
+            style={{ fontSize: 14, minWidth: 160 }}
           >
             <option value="">Todos los tipos</option>
             {availableTipoMarcas.map((tipo) => (
@@ -199,12 +205,12 @@ export function FilterBar({ filters, onFiltersChange, availableBrands, available
         </div>
 
         {/* Filtro por Género */}
-        <div className="relative">
+        <div className="relative lg:col-span-3">
           <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <select
             value={filters.genero || ''}
             onChange={(e) => handleGenderChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 appearance-none"
+            className="w-full pl-10 pr-6 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 appearance-none text-sm min-w-[180px]"
           >
             <option value="">Todos los géneros</option>
             {availableGenders.map((genero) => (
@@ -216,7 +222,7 @@ export function FilterBar({ filters, onFiltersChange, availableBrands, available
         </div>
 
         {/* Filtro por Precio (slider doble) */}
-        <div className="col-span-1 lg:col-span-2 mb-6 md:mb-6">
+        <div className="col-span-1 lg:col-span-4 mb-6 md:mb-6">
           {bounds.max > bounds.min ? (
             <>
           <div className="mb-2 flex items-center justify-between text-sm text-gray-600">
@@ -282,12 +288,12 @@ export function FilterBar({ filters, onFiltersChange, availableBrands, available
         </div>
 
         {/* Ordenamiento */}
-        <div className="relative">
+        <div className="relative lg:col-span-2">
           <SortAsc className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <select
             value={filters.sortBy}
             onChange={(e) => handleSortChange(e.target.value as FilterOptions['sortBy'])}
-            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 appearance-none"
+            className="w-full pl-10 pr-6 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 appearance-none text-sm min-w-[160px]"
           >
             <option value="default">Ordenar por</option>
             <option value="name">Nombre A-Z</option>
@@ -297,7 +303,7 @@ export function FilterBar({ filters, onFiltersChange, availableBrands, available
         </div>
 
         {/* Filtro de ofertas */}
-        <div className="flex items-center">
+        <div className="flex items-center lg:col-span-2">
           <button
             onClick={handleOffersToggle}
             className={`flex items-center space-x-2 px-4 py-3 rounded-xl font-medium transition-all duration-200 w-full justify-center ${
