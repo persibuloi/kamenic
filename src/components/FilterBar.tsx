@@ -100,59 +100,134 @@ export function FilterBar({ filters, onFiltersChange, availableBrands, available
         </button>
       </div>
 
-      {/* Chips de filtros rápidos (solo móvil) */}
-      <div className="md:hidden -mx-3 px-3 py-2 bg-white rounded-xl border border-amber-100">
-        <div className="flex items-center gap-2 overflow-x-auto py-1 snap-x snap-mandatory scroll-px-3">
-          {/* Solo ofertas */}
+      {/* Filtros compactos para móvil (dropdowns + slider) */}
+      <div className="md:hidden -mx-3 px-3 py-3 bg-white rounded-xl border border-amber-100 space-y-3">
+        {/* Toggle Ofertas */}
+        <button
+          type="button"
+          onClick={handleOffersToggle}
+          aria-pressed={filters.showOnlyOffers}
+          className={`w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium border transition-colors ${
+            filters.showOnlyOffers
+              ? 'bg-gradient-to-r from-red-500 to-red-600 text-white border-red-600 shadow'
+              : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+          }`}
+        >
+          <Filter className="h-4 w-4" />
+          <span>Solo ofertas</span>
+        </button>
+
+        {/* Dropdowns: Marca, Tipo, Género */}
+        <div className="grid grid-cols-1 gap-2">
+          <div className="relative">
+            <Tag className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <select
+              value={filters.marca || ''}
+              onChange={(e) => handleBrandChange(e.target.value)}
+              className="w-full pl-10 pr-8 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm bg-white"
+            >
+              <option value="">Todas las marcas</option>
+              {availableBrands.map((brand) => (
+                <option key={brand} value={brand}>{brand}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="relative">
+            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <select
+              value={filters.tipoMarca || ''}
+              onChange={(e) => handleTipoMarcaChange(e.target.value)}
+              className="w-full pl-10 pr-8 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm bg-white"
+            >
+              <option value="">Todos los tipos</option>
+              {availableTipoMarcas.map((tipo) => (
+                <option key={tipo} value={tipo}>{tipo}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="relative">
+            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <select
+              value={filters.genero || ''}
+              onChange={(e) => handleGenderChange(e.target.value)}
+              className="w-full pl-10 pr-8 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm bg-white"
+            >
+              <option value="">Todos los géneros</option>
+              {availableGenders.map((genero) => (
+                <option key={genero} value={genero}>{genero}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Slider de precios compacto */}
+        {bounds.max > bounds.min && (
+          <div className="rounded-lg border border-gray-100 p-3">
+            <div className="mb-2 flex items-center justify-between text-xs text-gray-600">
+              <span>Precio</span>
+              <span>
+                {currentMin.toLocaleString(undefined, { style: 'currency', currency: currencyCode, maximumFractionDigits: 0 })}
+                {' '}-
+                {' '}
+                {currentMax.toLocaleString(undefined, { style: 'currency', currency: currencyCode, maximumFractionDigits: 0 })}
+              </span>
+            </div>
+            <div className="px-1 pb-1">
+              <div className="relative h-8 mb-3">
+                <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-2 rounded-full bg-gray-200" />
+                <div
+                  className="absolute top-1/2 -translate-y-1/2 h-2 rounded-full bg-amber-500/40"
+                  style={{
+                    left: `${((currentMin - bounds.min) / (bounds.max - bounds.min)) * 100}%`,
+                    right: `${(1 - (currentMax - bounds.min) / (bounds.max - bounds.min)) * 100}%`,
+                  }}
+                />
+                <input
+                  type="range"
+                  min={bounds.min}
+                  max={bounds.max}
+                  step={1}
+                  value={currentMax}
+                  onChange={(e) => handleMaxChange(Number(e.target.value))}
+                  className="w-full absolute top-0 left-0 z-0 appearance-none bg-transparent [::-webkit-slider-thumb]:appearance-none [::-webkit-slider-thumb]:h-5 [::-webkit-slider-thumb]:w-5 [::-webkit-slider-thumb]:rounded-full [::-webkit-slider-thumb]:bg-amber-600 [::-webkit-slider-runnable-track]:h-3 [::-webkit-slider-runnable-track]:bg-transparent"
+                />
+                <input
+                  type="range"
+                  min={bounds.min}
+                  max={bounds.max}
+                  step={1}
+                  value={currentMin}
+                  onChange={(e) => handleMinChange(Number(e.target.value))}
+                  className="w-full absolute bottom-0 left-0 z-10 appearance-none bg-transparent [::-webkit-slider-thumb]:appearance-none [::-webkit-slider-thumb]:h-5 [::-webkit-slider-thumb]:w-5 [::-webkit-slider-thumb]:rounded-full [::-webkit-slider-thumb]:bg-amber-600 [::-webkit-slider-runnable-track]:h-3 [::-webkit-slider-runnable-track]:bg-transparent"
+                />
+              </div>
+              <div className="mt-1 flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleResetPrice}
+                  className="text-[11px] px-2.5 py-1 rounded-md text-amber-700 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-200"
+                >
+                  Restablecer
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Botón a filtros avanzados */}
+        {onOpenAdvanced && (
           <button
             type="button"
-            onClick={handleOffersToggle}
-            aria-pressed={filters.showOnlyOffers}
-            className={`shrink-0 snap-start whitespace-nowrap px-3 py-1.5 rounded-full text-[13px] border shadow-sm transition-colors ${
-              filters.showOnlyOffers
-                ? 'bg-gradient-to-r from-red-500 to-red-600 text-white border-red-600 shadow-md'
-                : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
-            }`}
+            onClick={() => onOpenAdvanced()}
+            className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium bg-gradient-to-r from-amber-600 to-amber-700 text-white hover:from-amber-700 hover:to-amber-800 shadow"
+            aria-label="Abrir filtros avanzados"
           >
-            🔥 Ofertas
+            <Filter className="h-4 w-4" />
+            Más filtros
           </button>
-
-          {/* Géneros */}
-          {availableGenders.slice(0, 3).map((g) => (
-            <button
-              key={g}
-              type="button"
-              onClick={() => handleGenderChange(filters.genero === g ? '' : g)}
-              aria-pressed={filters.genero === g}
-              className={`shrink-0 snap-start whitespace-nowrap px-3 py-1.5 rounded-full text-[13px] border shadow-sm transition-colors ${
-                filters.genero === g
-                  ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-white border-amber-600 shadow-md'
-                  : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
-              }`}
-            >
-              <Filter className="inline-block h-3 w-3 mr-1 opacity-80" />
-              {g}
-            </button>
-          ))}
-
-          {/* Tipos de marca destacados */}
-          {availableTipoMarcas.slice(0, 5).map((t) => (
-            <button
-              key={t}
-              type="button"
-              onClick={() => handleTipoMarcaChange(filters.tipoMarca === t ? '' : t)}
-              aria-pressed={filters.tipoMarca === t}
-              className={`shrink-0 snap-start whitespace-nowrap px-3 py-1.5 rounded-full text-[13px] border shadow-sm transition-colors ${
-                filters.tipoMarca === t
-                  ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-white border-amber-600 shadow-md'
-                  : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
-              }`}
-            >
-              <Filter className="inline-block h-3 w-3 mr-1 opacity-80" />
-              {t}
-            </button>
-          ))}
-        </div>
+        )}
       </div>
 
       {/* Versión completa para md+ */}
