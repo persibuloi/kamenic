@@ -214,6 +214,36 @@ Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
 - 📱 **WhatsApp:** [+57 300 123 4567](https://wa.me/573001234567)
 - 🐛 **Issues:** [GitHub Issues](https://github.com/tu-usuario/essence-luxe-perfumes/issues)
 
+## 📝 Novedades (2025-08-29)
+
+### Contacto y Mapa Dinámico
+- Mapa embebido en `src/pages/ContactPage.tsx` usando `SiteSettings.mapsURL` (Airtable). Si falta, se construye con `ContactInfo.address`.
+- Soporte para enlaces cortos `maps.app.goo.gl` (el iframe usa la dirección para mayor compatibilidad).
+- Botones: "Abrir en Google Maps", "Cómo llegar" y "Copiar dirección".
+- Teléfono y email clicables (`tel:`/`mailto:`) en `ContactPage` y `Footer` (`components/ContactInfo.tsx`).
+- Botón "Copiar teléfono" en `ContactPage`.
+- Toasts no intrusivos para confirmaciones de copiado.
+- Footer: "Ver mapa" ahora con fallback a dirección si `mapsURL` está vacío.
+
+Campos relevantes en Airtable:
+- SiteSettings: `mapsURL`, `horario` (horarios multilínea)
+- ContactInfo: `address`, `phone`, `email`, `whatsappNumber`
+
+Variables de entorno relacionadas (ya existentes):
+- `VITE_AIRTABLE_API_TOKEN`
+- `VITE_AIRTABLE_BASE_ID`
+- `VITE_AIRTABLE_CONTACT_BASE_ID` (opcional)
+- `VITE_AIRTABLE_SETTINGS_BASE_ID` (opcional)
+- `VITE_AIRTABLE_CONTACT_TABLE`
+- `VITE_AIRTABLE_SETTINGS_TABLE`
+
+Archivos modificados:
+- `src/pages/ContactPage.tsx`
+- `src/components/ContactInfo.tsx`
+- `src/App.tsx`
+
+---
+
 ## 🙏 Agradecimientos
 
 - Diseño inspirado en las mejores prácticas de e-commerce

@@ -1,7 +1,28 @@
 import React from 'react';
 import { Instagram, Facebook, Twitter, MapPin, Phone, Mail } from 'lucide-react';
+import { useContact } from '../hooks/useContact';
+import { ContactInfo } from './ContactInfo';
 
 export function Footer() {
+  const { contact, loading } = useContact();
+  const fallback = {
+    name: 'KameNic',
+    address: 'KameNic',
+    phone: '+505 8219-3629',
+    email: 'kamenic@gmail.com',
+    instagramUrl: 'https://www.instagram.com/kame_nic',
+    facebookUrl: 'https://www.facebook.com/KameNicaragua',
+    whatsappLink: 'https://wa.me/50582193629',
+  };
+  const info = {
+    name: contact?.name || fallback.name,
+    address: contact?.address || fallback.address,
+    phone: contact?.phone || fallback.phone,
+    email: contact?.email || fallback.email,
+    instagramUrl: contact?.instagramUrl || fallback.instagramUrl,
+    facebookUrl: contact?.facebookUrl || fallback.facebookUrl,
+    whatsappLink: contact?.whatsappLink || fallback.whatsappLink,
+  };
   return (
     <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -17,7 +38,7 @@ export function Footer() {
             </p>
             <div className="flex space-x-4">
               <a 
-                href="https://www.instagram.com/kame_nic" 
+                href={info.instagramUrl}
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-amber-400 transition-colors duration-200"
@@ -26,7 +47,7 @@ export function Footer() {
                 <Instagram className="h-5 w-5" />
               </a>
               <a 
-                href="https://www.facebook.com/KameNicaragua" 
+                href={info.facebookUrl}
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-amber-400 transition-colors duration-200"
@@ -51,24 +72,8 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Información de contacto */}
-          <div>
-            <h4 className="font-semibold text-lg mb-4 text-amber-400">Contacto</h4>
-            <ul className="space-y-3">
-              <li className="flex items-center text-gray-300">
-                <MapPin className="h-4 w-4 mr-2 text-amber-400" />
-                <span className="text-sm">KameNic</span>
-              </li>
-              <li className="flex items-center text-gray-300">
-                <Phone className="h-4 w-4 mr-2 text-amber-400" />
-                <span className="text-sm">+505 8219-3629</span>
-              </li>
-              <li className="flex items-center text-gray-300">
-                <Mail className="h-4 w-4 mr-2 text-amber-400" />
-                <span className="text-sm">kamenic@gmail.com</span>
-              </li>
-            </ul>
-          </div>
+          {/* Información de contacto (dinámica) */}
+          <ContactInfo />
         </div>
 
         {/* Botón de WhatsApp y redes sociales */}
@@ -82,7 +87,7 @@ export function Footer() {
               <div className="flex items-center space-x-4">
                 <span className="text-gray-400 text-sm">Síguenos:</span>
                 <a 
-                  href="https://www.instagram.com/kame_nic" 
+                  href={info.instagramUrl}
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white p-2 rounded-full transition-all duration-200 transform hover:scale-110"
@@ -91,7 +96,7 @@ export function Footer() {
                   <Instagram className="h-4 w-4" />
                 </a>
                 <a 
-                  href="https://www.facebook.com/KameNicaragua" 
+                  href={info.facebookUrl}
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full transition-all duration-200 transform hover:scale-110"
@@ -102,7 +107,7 @@ export function Footer() {
               </div>
             </div>
             <a 
-              href="https://wa.me/50582193629" 
+              href={info.whatsappLink}
               target="_blank" 
               rel="noopener noreferrer"
               className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full flex items-center space-x-2 transition-colors duration-200 mt-4 sm:mt-0"

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShoppingBag, Menu, X, Search, Heart, MessageCircle } from 'lucide-react';
 import { useCartContext } from '../context/CartContext';
 import { useFavoritesContext } from '../context/FavoritesContext';
@@ -24,6 +24,23 @@ export function Header({ onCartClick, webhookUrl }: HeaderProps) {
 
 
   
+  // Debounce de búsqueda: navega al catálogo tras 350ms sin teclear
+  useEffect(() => {
+    if (!isSearchOpen) return;
+    const term = searchQuery.trim();
+    if (!term) return;
+    const t = setTimeout(() => {
+      const newHash = `catalog?search=${encodeURIComponent(term)}`;
+      if (window.location.hash !== `#${newHash}`) {
+        window.location.hash = newHash;
+      } else {
+        // Forzar actualización si ya estamos en el catálogo con el mismo hash
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
+      }
+    }, 350);
+    return () => clearTimeout(t);
+  }, [searchQuery, isSearchOpen]);
+
   // Función para manejar la búsqueda
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

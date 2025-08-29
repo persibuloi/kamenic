@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
+import { AnnouncementBar } from './components/AnnouncementBar';
 import { CartModal } from './components/CartModal';
 import { HomePage } from './pages/HomePage';
 import { CatalogPage } from './pages/CatalogPage';
 import { ContactPage } from './pages/ContactPage';
 import { CartProvider } from './context/CartContext';
 import { FavoritesProvider } from './context/FavoritesContext';
+import { useContact } from './hooks/useContact';
 
 // Importación lazy del blog para evitar problemas
 const BlogPage = React.lazy(() => import('./pages/BlogPage'));
@@ -16,17 +18,19 @@ type Page = 'home' | 'catalog' | 'contact' | 'blog';
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const { contact } = useContact();
   
-  // Configuración del webhook para n8n (PRODUCCIÓN)
-  // Primero intentamos la variable de entorno, si no está disponible usamos la URL de producción
-  const webhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL || 
+  // Configuración del webhook para n8n
+  // Si no hay variable de entorno, usar fallback (comportamiento original solicitado)
+  const webhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL ||
     'https://n8n-n8n.wppjp8.easypanel.host/webhook/f1811e79-cf48-4e5a-ab66-72ed4fb59dc6';
-  
-  // Debug: verificar que la variable de entorno se cargue
-  console.log('🔍 DEBUG - Variable de entorno VITE_N8N_WEBHOOK_URL:', import.meta.env.VITE_N8N_WEBHOOK_URL);
-  console.log('🔍 DEBUG - webhookUrl final:', webhookUrl);
-  console.log('🚀 WEBHOOK CONFIGURADO - El chatbot usará:', webhookUrl);
-  console.log('🔥 APP.TSX - Renderizando SingleChat con webhookUrl:', webhookUrl);
+
+  // Debug solo en desarrollo
+  if (import.meta.env.DEV) {
+    console.log('🔍 DEBUG - Variable de entorno VITE_N8N_WEBHOOK_URL:', import.meta.env.VITE_N8N_WEBHOOK_URL);
+    console.log('🔍 DEBUG - webhookUrl final:', webhookUrl);
+    console.log('🚀 WEBHOOK CONFIGURADO - El chatbot usará:', webhookUrl);
+  }
 
 
   // Manejar navegación por hash
@@ -91,6 +95,7 @@ function App() {
       <FavoritesProvider>
         <div className="min-h-screen bg-white">
         <Header onCartClick={() => setIsCartOpen(true)} webhookUrl={webhookUrl} />
+        <AnnouncementBar />
         
         <main>
           {renderCurrentPage()}
@@ -107,7 +112,7 @@ function App() {
 
         {/* Botón flotante de WhatsApp */}
         <a 
-          href="https://wa.me/50582193629" 
+          href={contact?.whatsappLink || 'https://wa.me/50582193629'} 
           target="_blank" 
           rel="noopener noreferrer"
           className="fixed bottom-6 right-6 z-40 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-2xl transition-all duration-200 transform hover:scale-110"

@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import { MapPin, Phone, Mail, Clock, MessageCircle } from 'lucide-react';
 import { sendWebMessageToAirtable, WebMessage } from '../lib/airtableMessages';
+import { useContact } from '../hooks/useContact';
+import { useSiteSettings } from '../hooks/useSiteSettings';
 
 export function ContactPage() {
+  const { contact, loading: loadingContact, error: contactError } = useContact();
+  const { settings, loading: loadingSettings, error: settingsError } = useSiteSettings();
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -13,10 +17,19 @@ export function ContactPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+  const showToast = (msg: string) => {
+    setToast(msg);
+    window.clearTimeout((showToast as any)._t);
+    (showToast as any)._t = window.setTimeout(() => setToast(null), 2000);
+  };
+  
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
+
+  
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -58,6 +71,8 @@ export function ContactPage() {
           </p>
         </div>
 
+        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Información de contacto */}
           <div className="space-y-8">
@@ -73,10 +88,14 @@ export function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-1">Dirección</h3>
-                    <p className="text-gray-600">
-                      KameNic<br />
-                      Perfumes y Fragancias
-                    </p>
+                    {loadingContact ? (
+                      <p className="text-gray-400">Cargando…</p>
+                    ) : (
+                      <p className="text-gray-600">
+                        {contact?.name || 'KameNic'}<br />
+                        {contact?.address || 'Perfumes y Fragancias'}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -86,10 +105,33 @@ export function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-1">Teléfono</h3>
-                    <p className="text-gray-600">
-                      +505 8219-3629<br />
-                      WhatsApp disponible
-                    </p>
+                    {loadingContact ? (
+                      <p className="text-gray-400">Cargando…</p>
+                    ) : (
+                      <div>
+                        <p className="text-gray-600">
+                          <a
+                            href={`tel:${(contact?.phone || '+505 8219-3629').toString().replace(/[^\d+]/g, '')}`}
+                            className="text-amber-700 hover:text-amber-800 underline underline-offset-2"
+                          >
+                            {contact?.phone || '+505 8219-3629'}
+                          </a>
+                          <br />
+                          {contact?.whatsappNumber ? 'WhatsApp disponible' : ''}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const phoneToCopy = contact?.phone || '+505 8219-3629';
+                            navigator.clipboard?.writeText(phoneToCopy);
+                            showToast('Teléfono copiado');
+                          }}
+                          className="mt-2 inline-flex items-center justify-center px-3 py-1.5 rounded-lg bg-white text-amber-700 border border-amber-200 hover:bg-amber-50 transition-colors text-sm"
+                        >
+                          Copiar teléfono
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -99,10 +141,20 @@ export function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-1">Email</h3>
-                    <p className="text-gray-600">
-                      kamenic@gmail.com<br />
-                      Consultas y pedidos
-                    </p>
+                    {loadingContact ? (
+                      <p className="text-gray-400">Cargando…</p>
+                    ) : (
+                      <p className="text-gray-600">
+                        <a
+                          href={`mailto:${contact?.email || 'kamenic@gmail.com'}`}
+                          className="text-amber-700 hover:text-amber-800 underline underline-offset-2"
+                        >
+                          {contact?.email || 'kamenic@gmail.com'}
+                        </a>
+                        <br />
+                        Consultas y pedidos
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -112,11 +164,23 @@ export function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-1">Horarios de Atención</h3>
-                    <p className="text-gray-600">
-                      Lunes a Viernes: 9:00 AM - 7:00 PM<br />
-                      Sábados: 10:00 AM - 6:00 PM<br />
-                      Domingos: 11:00 AM - 5:00 PM
-                    </p>
+                    {loadingContact || loadingSettings ? (
+                      <p className="text-gray-400">Cargando…</p>
+                    ) : (
+                      (() => {
+                        const text = contact?.businessHours || settings?.horario || 'Lunes a Domingo: 9:00 AM - 7:00 PM';
+                        const lines = text.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+                        return lines.length > 1 ? (
+                          <ul className="list-disc ml-5 text-gray-600 space-y-1">
+                            {lines.map((l, i) => (
+                              <li key={i}>{l}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-gray-600 whitespace-pre-line">{text}</p>
+                        );
+                      })()
+                    )}
                   </div>
                 </div>
               </div>
@@ -137,7 +201,7 @@ export function ContactPage() {
                 ¿Tienes dudas sobre nuestros productos? ¡Escríbenos y te ayudamos a elegir el perfume perfecto!
               </p>
               <a 
-                href="https://wa.me/50582193629" 
+                href={contact?.whatsappLink || 'https://wa.me/50582193629'} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="inline-flex items-center bg-white text-green-600 px-6 py-3 rounded-xl font-semibold hover:bg-green-50 transition-all duration-200 shadow-lg"
@@ -267,42 +331,114 @@ export function ContactPage() {
           </div>
         </div>
 
-        {/* Mapa o información adicional */}
-        <div className="mt-12 bg-white rounded-2xl shadow-lg p-8 border border-amber-100">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-            ¿Por qué elegir KameNic?
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-amber-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <svg className="h-8 w-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
+        {/* Mapa de ubicación o información adicional */}
+        {(() => {
+          const addressForMap = contact?.address || '';
+          const mapsURL = settings?.mapsURL || '';
+          const isShortMaps = mapsURL.includes('maps.app.goo.gl');
+          const viewUrl = mapsURL || (addressForMap ? `https://www.google.com/maps?q=${encodeURIComponent(addressForMap)}` : '');
+          // Usar URL embebible estable. Evitar maps.app.goo.gl dentro del iframe.
+          const embedBaseFromAddress = addressForMap ? `https://www.google.com/maps?q=${encodeURIComponent(addressForMap)}&output=embed` : '';
+          const embedUrl = isShortMaps ? (embedBaseFromAddress || '') : (viewUrl ? `${viewUrl}${viewUrl.includes('?') ? '&' : '?'}output=embed` : '');
+          if (viewUrl) {
+            return (
+              <div className="mt-12 bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-amber-100">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4 md:mb-6 text-center">Ubicación</h2>
+                <div className="w-full rounded-2xl overflow-hidden border border-gray-200">
+                  <div className="aspect-[16/9] w-full">
+                    <iframe
+                      src={embedUrl || undefined}
+                      title="Ubicación en Google Maps"
+                      width="100%"
+                      height="100%"
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      style={{ border: 0 }}
+                      allowFullScreen
+                    />
+                  </div>
+                </div>
+                <div className="text-center mt-4">
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <a
+                      href={viewUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-amber-600 text-white hover:bg-amber-700 transition-colors"
+                    >
+                      Abrir en Google Maps
+                    </a>
+                    <a
+                      href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addressForMap || '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-white text-amber-700 border border-amber-200 hover:bg-amber-50 transition-colors"
+                    >
+                      Cómo llegar
+                    </a>
+                    {addressForMap && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard?.writeText(addressForMap);
+                          showToast('Dirección copiada');
+                        }}
+                        className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-white text-amber-700 border border-amber-200 hover:bg-amber-50 transition-colors"
+                      >
+                        Copiar dirección
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
-              <h3 className="font-semibold text-lg text-gray-900 mb-2">Productos Originales</h3>
-              <p className="text-gray-600">Garantía del 100% en la autenticidad de todos nuestros perfumes</p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-amber-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <svg className="h-8 w-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+            );
+          }
+          return (
+            <div className="mt-12 bg-white rounded-2xl shadow-lg p-8 border border-amber-100">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">¿Por qué elegir KameNic?</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-amber-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg className="h-8 w-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h3 className="font-semibold text-lg text-gray-900 mb-2">Productos Originales</h3>
+                  <p className="text-gray-600">Garantía del 100% en la autenticidad de todos nuestros perfumes</p>
+                </div>
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-amber-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg className="h-8 w-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="font-semibold text-lg text-gray-900 mb-2">Entrega Rápida</h3>
+                  <p className="text-gray-600">Envíos seguros y rápidos a todo Nicaragua en 24-48 horas</p>
+                </div>
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-amber-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg className="h-8 w-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+                    </svg>
+                  </div>
+                  <h3 className="font-semibold text-lg text-gray-900 mb-2">Soporte Personalizado</h3>
+                  <p className="text-gray-600">Asesoramiento experto para encontrar tu fragancia ideal</p>
+                </div>
               </div>
-              <h3 className="font-semibold text-lg text-gray-900 mb-2">Entrega Rápida</h3>
-              <p className="text-gray-600">Envíos seguros y rápidos a todo Nicaragua en 24-48 horas</p>
             </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-amber-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <svg className="h-8 w-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
-                </svg>
-              </div>
-              <h3 className="font-semibold text-lg text-gray-900 mb-2">Soporte Personalizado</h3>
-              <p className="text-gray-600">Asesoramiento experto para encontrar tu fragancia ideal</p>
-            </div>
-          </div>
-        </div>
+          );
+        })()}
       </div>
+      {/* Toast notification */}
+      {toast && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white px-4 py-2 rounded-lg shadow-lg"
+        >
+          {toast}
+        </div>
+      )}
     </div>
   );
 }

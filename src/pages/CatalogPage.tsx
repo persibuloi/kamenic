@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { ProductCard } from '../components/ProductCard';
 import { FilterBar } from '../components/FilterBar';
 import { LoadingSpinner, ProductGridSkeleton } from '../components/LoadingSpinner';
@@ -279,10 +279,18 @@ export function CatalogPage() {
     // Ordenamiento
     switch (filters.sortBy) {
       case 'price-asc':
-        filtered.sort((a, b) => a.precio1 - b.precio1);
+        filtered.sort((a, b) => {
+          const ap = (typeof a.precioOferta === 'number' && a.precioOferta > 0) ? a.precioOferta : a.precio1;
+          const bp = (typeof b.precioOferta === 'number' && b.precioOferta > 0) ? b.precioOferta : b.precio1;
+          return ap - bp;
+        });
         break;
       case 'price-desc':
-        filtered.sort((a, b) => b.precio1 - a.precio1);
+        filtered.sort((a, b) => {
+          const ap = (typeof a.precioOferta === 'number' && a.precioOferta > 0) ? a.precioOferta : a.precio1;
+          const bp = (typeof b.precioOferta === 'number' && b.precioOferta > 0) ? b.precioOferta : b.precio1;
+          return bp - ap;
+        });
         break;
       case 'name':
         filtered.sort((a, b) => a.descripcion.localeCompare(b.descripcion));
@@ -300,11 +308,32 @@ export function CatalogPage() {
     return filtered;
   }, [uniqueProducts, filters]);
 
+  // Calcular límites globales de precios
+  const priceBounds = useMemo(() => {
+    if (!uniqueProducts.length) return { min: 0, max: 0 };
+    let min = Number.POSITIVE_INFINITY;
+    let max = 0;
+    for (const p of uniqueProducts) {
+      const price = (typeof p.precioOferta === 'number' && p.precioOferta > 0) ? p.precioOferta : p.precio1;
+      if (price < min) min = price;
+      if (price > max) max = price;
+    }
+    if (!isFinite(min)) min = 0;
+    return { min, max };
+  }, [uniqueProducts]);
+
+  // Inicializar rango de precios al cargar productos/límites
+  useEffect(() => {
+    if (priceBounds.max > 0 && (!filters.priceRange || filters.priceRange.min === undefined || filters.priceRange.max === undefined)) {
+      setFilters(prev => ({ ...prev, priceRange: { min: priceBounds.min, max: priceBounds.max } }));
+    }
+  }, [priceBounds.min, priceBounds.max]);
+
   // Calcular productos paginados
   const paginatedProducts = useMemo(() => {
-    const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
-    const endIndex = startIndex + PRODUCTS_PER_PAGE;
-    return filteredProducts.slice(startIndex, endIndex);
+    // Comportamiento "Ver más": mostrar acumulado hasta la página actual
+    const endIndex = currentPage * PRODUCTS_PER_PAGE;
+    return filteredProducts.slice(0, endIndex);
   }, [filteredProducts, currentPage, PRODUCTS_PER_PAGE]);
 
   // Calcular información de paginación
@@ -312,12 +341,31 @@ export function CatalogPage() {
   const hasNextPage = currentPage < totalPages;
   const hasPrevPage = currentPage > 1;
 
+  // Infinite scroll sentinel
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!hasNextPage) return;
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      const [entry] = entries;
+      if (entry.isIntersecting) {
+        setCurrentPage((p) => (p < totalPages ? p + 1 : p));
+      }
+    }, { rootMargin: '200px 0px' });
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasNextPage, totalPages]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-amber-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
             Catálogo de Perfumes
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -332,6 +380,9 @@ export function CatalogPage() {
           availableBrands={availableBrands}
           availableTipoMarcas={availableTipoMarcas}
           availableGenders={availableGenders}
+          priceMin={priceBounds.min}
+          priceMax={priceBounds.max}
+          onOpenAdvanced={() => setShowAdvancedFilters(true)}
         />
 
         {/* Contador de resultados */}
@@ -381,7 +432,7 @@ export function CatalogPage() {
           <>
             {filteredProducts.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                   {paginatedProducts.map((product) => (
                     <ProductCard 
                       key={product.id} 
@@ -390,80 +441,24 @@ export function CatalogPage() {
                     />
                   ))}
                 </div>
+                {/* Sentinel para infinite scroll */}
+                {hasNextPage && (
+                  <div ref={sentinelRef} className="h-1 w-full" aria-hidden="true" />
+                )}
                 
-                {/* Controles de paginación */}
-                {totalPages > 1 && (
-                  <div className="mt-12 flex flex-col items-center space-y-4">
-                    {/* Información de página */}
-                    <div className="text-sm text-gray-600">
-                      Página {currentPage} de {totalPages} 
+                {/* Cargar más (mejor UX en mobile) */}
+                {hasNextPage && (
+                  <div className="mt-10 flex flex-col items-center">
+                    <button
+                      onClick={() => setCurrentPage((p) => p + 1)}
+                      className="px-6 py-3 rounded-xl font-semibold bg-gradient-to-r from-amber-600 to-amber-700 text-white hover:from-amber-700 hover:to-amber-800 shadow-lg hover:shadow-xl transition-colors"
+                    >
+                      Ver más
+                    </button>
+                    <div className="mt-3 text-sm text-gray-600">
+                      Página {currentPage} de {totalPages}
                       <span className="mx-2">•</span>
-                      Mostrando {paginatedProducts.length} de {filteredProducts.length} productos
-                    </div>
-                    
-                    {/* Botones de navegación */}
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => setCurrentPage(1)}
-                        disabled={!hasPrevPage}
-                        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Primera
-                      </button>
-                      
-                      <button
-                        onClick={() => setCurrentPage(currentPage - 1)}
-                        disabled={!hasPrevPage}
-                        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Anterior
-                      </button>
-                      
-                      {/* Números de página */}
-                      <div className="flex space-x-1">
-                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                          let pageNum;
-                          if (totalPages <= 5) {
-                            pageNum = i + 1;
-                          } else if (currentPage <= 3) {
-                            pageNum = i + 1;
-                          } else if (currentPage >= totalPages - 2) {
-                            pageNum = totalPages - 4 + i;
-                          } else {
-                            pageNum = currentPage - 2 + i;
-                          }
-                          
-                          return (
-                            <button
-                              key={pageNum}
-                              onClick={() => setCurrentPage(pageNum)}
-                              className={`px-3 py-2 text-sm font-medium rounded-md ${
-                                currentPage === pageNum
-                                  ? 'bg-amber-600 text-white'
-                                  : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
-                              }`}
-                            >
-                              {pageNum}
-                            </button>
-                          );
-                        })}
-                      </div>
-                      
-                      <button
-                        onClick={() => setCurrentPage(currentPage + 1)}
-                        disabled={!hasNextPage}
-                        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Siguiente
-                      </button>
-                      
-                      <button
-                        onClick={() => setCurrentPage(totalPages)}
-                        disabled={!hasNextPage}
-                        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Última
-                      </button>
+                      Mostrando {paginatedProducts.length + (currentPage - 1) * PRODUCTS_PER_PAGE} de {filteredProducts.length} productos
                     </div>
                   </div>
                 )}

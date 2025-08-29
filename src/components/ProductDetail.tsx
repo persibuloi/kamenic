@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ProductDetailProps } from '../types/product';
 import { useCartContext } from '../context/CartContext';
 import './ProductDetail.css';
@@ -29,10 +29,39 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onClose, onAddTo
     ? Math.round(((product.precio1 - product.precioOferta!) / product.precio1) * 100)
     : 0;
 
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [zoomed, setZoomed] = useState(false);
+  const closeBtnRef = useRef<HTMLButtonElement | null>(null);
+
+  // Lock scroll and focus management
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    // Focus close button on open
+    closeBtnRef.current?.focus();
+
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [onClose]);
+
   return (
     <div className="product-detail-overlay" onClick={onClose}>
-      <div className="product-detail-modal" onClick={(e) => e.stopPropagation()}>
-        <button className="close-button" onClick={onClose}>
+      <div
+        className="product-detail-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="product-detail-title"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button ref={closeBtnRef} className="close-button" onClick={onClose} aria-label="Cerrar detalles del producto">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -40,13 +69,28 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onClose, onAddTo
         </button>
 
         <div className="product-detail-content">
-          <div className="product-detail-image">
+          <div className="product-detail-image" style={{ position: 'relative' }}>
+            {/* Placeholder blur */}
+            <div
+              aria-hidden="true"
+              style={{
+                position: 'absolute', inset: 0, backgroundColor: '#e5e7eb',
+                opacity: imgLoaded ? 0 : 1, transition: 'opacity 400ms ease'
+              }}
+            />
             <img 
               src={product.imagen || '/placeholder-perfume.jpg'} 
               alt={product.descripcion}
+              loading="lazy"
+              decoding="async"
+              onLoad={() => setImgLoaded(true)}
               onError={(e) => {
                 e.currentTarget.src = '/placeholder-perfume.jpg';
+                setImgLoaded(true);
               }}
+              style={{ opacity: imgLoaded ? 1 : 0, transition: 'opacity 400ms ease' }}
+              className={zoomed ? 'zoomed' : ''}
+              onClick={() => setZoomed((z) => !z)}
             />
             {hasDiscount && (
               <div className="discount-badge">
@@ -76,7 +120,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onClose, onAddTo
               </div>
             </div>
 
-            <h1 className="product-title">{product.descripcion}</h1>
+            <h1 className="product-title" id="product-detail-title">{product.descripcion}</h1>
             
             {product.marca && (
               <div className="product-brand">

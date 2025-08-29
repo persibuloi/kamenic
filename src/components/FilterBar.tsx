@@ -8,9 +8,13 @@ interface FilterBarProps {
   availableBrands: string[];
   availableTipoMarcas: string[];
   availableGenders: string[];
+  priceMin?: number;
+  priceMax?: number;
+  currencyCode?: string;
+  onOpenAdvanced?: () => void; // abrir modal avanzado desde móvil
 }
 
-export function FilterBar({ filters, onFiltersChange, availableBrands, availableTipoMarcas, availableGenders }: FilterBarProps) {
+export function FilterBar({ filters, onFiltersChange, availableBrands, availableTipoMarcas, availableGenders, priceMin, priceMax, currencyCode = 'USD', onOpenAdvanced }: FilterBarProps) {
   const handleSearchChange = (searchTerm: string) => {
     onFiltersChange({ ...filters, searchTerm });
   };
@@ -35,9 +39,119 @@ export function FilterBar({ filters, onFiltersChange, availableBrands, available
     onFiltersChange({ ...filters, showOnlyOffers: !filters.showOnlyOffers });
   };
 
+  const bounds = {
+    min: typeof priceMin === 'number' ? priceMin : 0,
+    max: typeof priceMax === 'number' ? priceMax : 0,
+  };
+
+  const currentMin = Math.max(bounds.min, Math.min(bounds.max, filters.priceRange?.min ?? bounds.min));
+  const currentMax = Math.max(bounds.min, Math.min(bounds.max, filters.priceRange?.max ?? bounds.max));
+
+  const handleMinChange = (value: number) => {
+    const v = Math.max(bounds.min, Math.min(value, bounds.max));
+    if (v > currentMax) {
+      // Swap: si min pasó por encima de max, intercambiamos
+      onFiltersChange({ ...filters, priceRange: { min: currentMax, max: v } });
+    } else {
+      onFiltersChange({ ...filters, priceRange: { min: v, max: currentMax } });
+    }
+  };
+
+  const handleMaxChange = (value: number) => {
+    const v = Math.max(bounds.min, Math.min(value, bounds.max));
+    if (v < currentMin) {
+      // Swap: si max pasó por debajo de min, intercambiamos
+      onFiltersChange({ ...filters, priceRange: { min: v, max: currentMin } });
+    } else {
+      onFiltersChange({ ...filters, priceRange: { min: currentMin, max: v } });
+    }
+  };
+
+  const handleResetPrice = () => {
+    if (bounds.max > bounds.min) {
+      onFiltersChange({ ...filters, priceRange: { min: bounds.min, max: bounds.max } });
+    }
+  };
+
   return (
-    <div className="bg-white shadow-lg rounded-2xl p-6 mb-8 border border-amber-100">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+    <div className="bg-white shadow-lg rounded-2xl p-4 sm:p-6 mb-8 border border-amber-100">
+      {/* Compacto en móvil: buscador + botón Filtros */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:hidden mb-3">
+        {/* Buscador (mobile) */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <input
+            type="text"
+            placeholder="Buscar perfumes..."
+            value={filters.searchTerm}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200"
+          />
+        </div>
+        {/* Botón para abrir filtros avanzados */}
+        <button
+          type="button"
+          onClick={() => onOpenAdvanced && onOpenAdvanced()}
+          className="flex items-center justify-center space-x-2 px-4 py-3 rounded-xl font-medium transition-all duration-200 bg-gradient-to-r from-amber-600 to-amber-700 text-white hover:from-amber-700 hover:to-amber-800"
+          aria-label="Abrir filtros avanzados"
+        >
+          <Filter className="h-4 w-4" />
+          <span>Filtros</span>
+        </button>
+      </div>
+
+      {/* Chips de filtros rápidos (solo móvil) */}
+      <div className="md:hidden -mx-2 px-2">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+          {/* Solo ofertas */}
+          <button
+            type="button"
+            onClick={handleOffersToggle}
+            className={`whitespace-nowrap px-3 py-1.5 rounded-full text-sm border ${
+              filters.showOnlyOffers
+                ? 'bg-red-600 text-white border-red-600'
+                : 'bg-white text-gray-700 border-gray-300'
+            }`}
+          >
+            🔥 Ofertas
+          </button>
+
+          {/* Géneros */}
+          {availableGenders.slice(0, 3).map((g) => (
+            <button
+              key={g}
+              type="button"
+              onClick={() => handleGenderChange(filters.genero === g ? '' : g)}
+              className={`whitespace-nowrap px-3 py-1.5 rounded-full text-sm border ${
+                filters.genero === g
+                  ? 'bg-amber-600 text-white border-amber-600'
+                  : 'bg-white text-gray-700 border-gray-300'
+              }`}
+            >
+              {g}
+            </button>
+          ))}
+
+          {/* Tipos de marca destacados */}
+          {availableTipoMarcas.slice(0, 5).map((t) => (
+            <button
+              key={t}
+              type="button"
+              onClick={() => handleTipoMarcaChange(filters.tipoMarca === t ? '' : t)}
+              className={`whitespace-nowrap px-3 py-1.5 rounded-full text-sm border ${
+                filters.tipoMarca === t
+                  ? 'bg-amber-600 text-white border-amber-600'
+                  : 'bg-white text-gray-700 border-gray-300'
+              }`}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Versión completa para md+ */}
+      <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
         {/* Buscador */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -99,6 +213,72 @@ export function FilterBar({ filters, onFiltersChange, availableBrands, available
               </option>
             ))}
           </select>
+        </div>
+
+        {/* Filtro por Precio (slider doble) */}
+        <div className="col-span-1 lg:col-span-2 mb-6 md:mb-6">
+          {bounds.max > bounds.min ? (
+            <>
+          <div className="mb-2 flex items-center justify-between text-sm text-gray-600">
+            <span>Precio</span>
+            <span>
+              {currentMin.toLocaleString(undefined, { style: 'currency', currency: currencyCode, maximumFractionDigits: 0 })}
+              {' '}-
+              {' '}
+              {currentMax.toLocaleString(undefined, { style: 'currency', currency: currencyCode, maximumFractionDigits: 0 })}
+            </span>
+          </div>
+
+          <div className="px-2 pb-3">
+            {/* Contenedor alto para separar los thumbs verticalmente */}
+            <div className="relative h-8 mb-5">
+              {/* Track centrado */}
+              <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-2 rounded-full bg-gray-200" />
+              {/* Highlight del rango */}
+              {bounds.max > bounds.min && (
+                <div
+                  className="absolute top-1/2 -translate-y-1/2 h-2 rounded-full bg-amber-500/40"
+                  style={{
+                    left: `${((currentMin - bounds.min) / (bounds.max - bounds.min)) * 100}%`,
+                    right: `${(1 - (currentMax - bounds.min) / (bounds.max - bounds.min)) * 100}%`,
+                  }}
+                />
+              )}
+              {/* Slider de Máximo (arriba) */}
+              <input
+                type="range"
+                min={bounds.min}
+                max={bounds.max}
+                step={1}
+                value={currentMax}
+                onChange={(e) => handleMaxChange(Number(e.target.value))}
+                className="w-full absolute top-0 left-0 z-0 appearance-none bg-transparent [::-webkit-slider-thumb]:appearance-none [::-webkit-slider-thumb]:h-5 [::-webkit-slider-thumb]:w-5 [::-webkit-slider-thumb]:rounded-full [::-webkit-slider-thumb]:bg-amber-600 [::-webkit-slider-runnable-track]:h-3 [::-webkit-slider-runnable-track]:bg-transparent"
+              />
+              {/* Slider de Mínimo (abajo) */}
+              <input
+                type="range"
+                min={bounds.min}
+                max={bounds.max}
+                step={1}
+                value={currentMin}
+                onChange={(e) => handleMinChange(Number(e.target.value))}
+                className="w-full absolute bottom-0 left-0 z-10 appearance-none bg-transparent [::-webkit-slider-thumb]:appearance-none [::-webkit-slider-thumb]:h-5 [::-webkit-slider-thumb]:w-5 [::-webkit-slider-thumb]:rounded-full [::-webkit-slider-thumb]:bg-amber-600 [::-webkit-slider-runnable-track]:h-3 [::-webkit-slider-runnable-track]:bg-transparent"
+              />
+            </div>
+            <div className="mt-2 flex justify-end">
+              <button
+                type="button"
+                onClick={handleResetPrice}
+                className="text-xs px-3 py-1 rounded-md text-amber-700 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-200"
+              >
+                Restablecer
+              </button>
+            </div>
+          </div>
+            </>
+          ) : (
+            <div className="text-sm text-gray-500">Rango de precios no disponible</div>
+          )}
         </div>
 
         {/* Ordenamiento */}

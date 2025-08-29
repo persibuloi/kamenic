@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X, Plus, Minus, ShoppingBag, Trash2 } from 'lucide-react';
 import { useCartContext } from '../context/CartContext';
+import { useStoreConfig } from '../hooks/useStoreConfig';
 
 interface CartModalProps {
   isOpen: boolean;
@@ -9,18 +10,55 @@ interface CartModalProps {
 
 export function CartModal({ isOpen, onClose }: CartModalProps) {
   const { cartItems, updateQuantity, removeFromCart, getTotalPrice, clearCart } = useCartContext();
+  const { freeShippingThreshold, currency, whatsappPhone, refresh, config, freeShippingEnabled } = useStoreConfig();
+
+  // Al abrir el carrito, refrescar configuración desde Airtable automáticamente
+  useEffect(() => {
+    if (isOpen) {
+      refresh();
+    }
+  }, [isOpen, refresh]);
   
   if (!isOpen) return null;
 
   const total = getTotalPrice();
+  // Umbral dinámico (Airtable/Query/env) ya resuelto por useStoreConfig
+  const FREE_SHIPPING_THRESHOLD = freeShippingEnabled && typeof freeShippingThreshold === 'number'
+    ? freeShippingThreshold
+    : undefined;
+  const progress = freeShippingEnabled && FREE_SHIPPING_THRESHOLD
+    ? Math.min(100, Math.floor((total / FREE_SHIPPING_THRESHOLD) * 100))
+    : 0;
+  const remaining = freeShippingEnabled && FREE_SHIPPING_THRESHOLD
+    ? Math.max(0, FREE_SHIPPING_THRESHOLD - total)
+    : 0;
 
   const handleWhatsAppOrder = () => {
-    const orderDetails = cartItems.map(item => 
-      `${item.product.descripcion} (${item.product.codigoKame}) - Cantidad: ${item.quantity} - Precio: $${(item.product.precioOferta || item.product.precio1).toLocaleString('es-CO')}`
-    ).join('\n');
-    
-    const message = `¡Hola! Me interesa realizar el siguiente pedido:\n\n${orderDetails}\n\nTotal: $${total.toLocaleString('es-CO')}\n\n¿Podrían darme más información?`;
-    const whatsappUrl = `https://wa.me/50582193629?text=${encodeURIComponent(message)}`;
+    const fmt = new Intl.NumberFormat('es-US', { style: 'currency', currency: (currency || 'USD') });
+    const orderDetails = cartItems.map(item => {
+      const unit = item.product.precioOferta || item.product.precio1;
+      return `• ${item.product.descripcion} (${item.product.codigoKame})\n   Cantidad: ${item.quantity}  |  Unit: ${fmt.format(unit)}  |  Subtotal: ${fmt.format(unit * item.quantity)}`;
+    }).join('\n');
+
+    const lines: string[] = [];
+    lines.push('¡Hola! Me interesa realizar el siguiente pedido:');
+    lines.push('');
+    lines.push(orderDetails);
+    lines.push('');
+    if (freeShippingEnabled && FREE_SHIPPING_THRESHOLD !== undefined) {
+      if (total >= FREE_SHIPPING_THRESHOLD) {
+        lines.push(`Envío gratis aplicado ✅ (umbral: ${fmt.format(FREE_SHIPPING_THRESHOLD)})`);
+      } else {
+        lines.push(`Aún no aplica envío gratis. Umbral: ${fmt.format(FREE_SHIPPING_THRESHOLD)} | Falta: ${fmt.format(remaining)}`);
+      }
+    }
+    lines.push(`Total: ${fmt.format(total)}`);
+    lines.push('');
+    lines.push('¿Podrían confirmar disponibilidad y tiempo de entrega?');
+
+    const message = lines.join('\n');
+    const phone = whatsappPhone || '50582193629';
+    const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 
@@ -55,6 +93,36 @@ export function CartModal({ isOpen, onClose }: CartModalProps) {
             </div>
           ) : (
             <div className="space-y-4">
+              {/* Banner de envío gratis */}
+              {freeShippingEnabled && FREE_SHIPPING_THRESHOLD !== undefined && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                  {total >= FREE_SHIPPING_THRESHOLD ? (
+                    <p className="text-amber-800 font-semibold">
+                      ¡Felicitaciones! Tienes <span className="underline">envío gratis</span> 🥳
+                    </p>
+                  ) : (
+                    <p className="text-amber-800">
+                      Te faltan <span className="font-semibold">{new Intl.NumberFormat('es-US', { style: 'currency', currency: (currency || 'USD') }).format(remaining)}</span> para obtener <span className="font-semibold">envío gratis</span>
+                    </p>
+                  )}
+                  <div className="mt-2 h-2 w-full rounded-full bg-amber-100 overflow-hidden">
+                    <div
+                      className="h-2 bg-gradient-to-r from-amber-500 to-amber-600 transition-all duration-500"
+                      style={{ width: `${progress}%` }}
+                      aria-hidden="true"
+                    />
+                  </div>
+                  <div className="mt-1 text-xs text-amber-700 flex flex-col sm:flex-row sm:items-center sm:gap-2">
+                    <span>Umbral: {new Intl.NumberFormat('es-US', { style: 'currency', currency: (currency || 'USD') }).format(FREE_SHIPPING_THRESHOLD)}</span>
+                    {config?.freeShippingEffectiveFrom && (
+                      <span className="text-amber-700">• Válida desde {new Date(config.freeShippingEffectiveFrom).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })}</span>
+                    )}
+                    {config?.freeShippingEffectiveTo && (
+                      <span className="text-amber-700">• Promo vigente hasta {new Date(config.freeShippingEffectiveTo).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })}</span>
+                    )}
+                  </div>
+                </div>
+              )}
               {cartItems.map((item) => (
                 <div key={item.product.id} className="bg-gray-50 rounded-xl p-4 border border-gray-100">
                   <div className="flex items-start space-x-4">
@@ -121,8 +189,15 @@ export function CartModal({ isOpen, onClose }: CartModalProps) {
           <div className="border-t border-gray-200 p-6 space-y-4">
             {/* Total */}
             <div className="flex justify-between items-center text-lg font-bold">
-              <span>Total:</span>
-              <span className="text-amber-600">${total.toLocaleString('es-CO')}</span>
+              <span className="flex items-center gap-2">
+                Total
+                {total >= FREE_SHIPPING_THRESHOLD && (
+                  <span className="text-xs font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full border border-green-200">
+                    Envío gratis
+                  </span>
+                )}
+              </span>
+              <span className="text-amber-600">{new Intl.NumberFormat('es-US', { style: 'currency', currency: (currency || 'USD') }).format(total)}</span>
             </div>
 
             {/* Botones de acción */}
