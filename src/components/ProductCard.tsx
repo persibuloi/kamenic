@@ -51,7 +51,18 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
 
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setShowShareMenu(!showShareMenu);
+    const nativeUrl = `${window.location.origin}/#producto=${product.id}?utm_source=share&utm_medium=native`;
+    const text = generateShareText();
+    if (navigator.share) {
+      navigator
+        .share({ title: product.descripcion, text, url: nativeUrl })
+        .catch(() => {
+          // Si el usuario cancela o falla, mostramos el menú clásico
+          setShowShareMenu(true);
+        });
+    } else {
+      setShowShareMenu(!showShareMenu);
+    }
   };
 
   // Generar texto para compartir
@@ -59,8 +70,8 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
     const priceText = hasOffer 
       ? `¡OFERTA! $${displayPrice?.toLocaleString('es-CO')} (antes $${product.precio1.toLocaleString('es-CO')}) - ¡${discount}% de descuento!`
       : `$${displayPrice?.toLocaleString('es-CO')}`;
-    
-    return `🌟 ${product.descripcion}\n\n💰 ${priceText}\n🏷️ Código: ${product.codigoKame}\n🔥 ${product.tipoMarca}\n\n¡Descubre esta increíble fragancia en Essence Luxe!\n\n🛒 Visita: ${window.location.origin}`;
+    const baseProductUrl = `${window.location.origin}/#producto=${product.id}`;
+    return `🌟 ${product.descripcion}\n\n💰 ${priceText}\n🏷️ Código: ${product.codigoKame}\n🔥 ${product.tipoMarca}\n\n¡Descubre esta increíble fragancia en Essence Luxe!\n\n🔗 ${baseProductUrl}`;
   };
 
   const shareToWhatsApp = (e: React.MouseEvent) => {
@@ -92,7 +103,7 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
 
   const shareToFacebook = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const url = window.location.origin;
+    const url = `${window.location.origin}/#producto=${product.id}?utm_source=share&utm_medium=facebook`;
     const text = `${product.descripcion} - ${hasOffer ? `¡OFERTA! $${displayPrice?.toLocaleString('es-CO')}` : `$${displayPrice?.toLocaleString('es-CO')}`}`;
     const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`;
     window.open(facebookUrl, '_blank');
@@ -102,7 +113,8 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
   const shareToTwitter = (e: React.MouseEvent) => {
     e.stopPropagation();
     const text = `🌟 ${product.descripcion} ${hasOffer ? `¡OFERTA! $${displayPrice?.toLocaleString('es-CO')} (${discount}% OFF)` : `$${displayPrice?.toLocaleString('es-CO')}`} en @EssenceLuxe`;
-    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.origin)}`;
+    const url = `${window.location.origin}/#producto=${product.id}?utm_source=share&utm_medium=twitter`;
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
     window.open(twitterUrl, '_blank');
     setShowShareMenu(false);
   };

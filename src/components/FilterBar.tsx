@@ -120,11 +120,11 @@ export function FilterBar({ filters, onFiltersChange, availableBrands, available
         {/* Dropdowns: Marca, Tipo, Género */}
         <div className="grid grid-cols-1 gap-2">
           <div className="relative">
-            <Tag className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Tag className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-3 w-3" />
             <select
               value={filters.marca || ''}
               onChange={(e) => handleBrandChange(e.target.value)}
-              className="w-full pl-10 pr-8 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm bg-white"
+              className="w-full pl-9 pr-8 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm bg-white"
             >
               <option value="">Todas las marcas</option>
               {availableBrands.map((brand) => (
@@ -134,11 +134,11 @@ export function FilterBar({ filters, onFiltersChange, availableBrands, available
           </div>
 
           <div className="relative">
-            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-3 w-3" />
             <select
               value={filters.tipoMarca || ''}
               onChange={(e) => handleTipoMarcaChange(e.target.value)}
-              className="w-full pl-10 pr-8 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm bg-white"
+              className="w-full pl-9 pr-8 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm bg-white"
             >
               <option value="">Todos los tipos</option>
               {availableTipoMarcas.map((tipo) => (
@@ -148,11 +148,11 @@ export function FilterBar({ filters, onFiltersChange, availableBrands, available
           </div>
 
           <div className="relative">
-            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-3 w-3" />
             <select
               value={filters.genero || ''}
               onChange={(e) => handleGenderChange(e.target.value)}
-              className="w-full pl-10 pr-8 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm bg-white"
+              className="w-full pl-9 pr-8 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm bg-white"
             >
               <option value="">Todos los géneros</option>
               {availableGenders.map((genero) => (
