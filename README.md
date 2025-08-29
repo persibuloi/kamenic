@@ -133,6 +133,74 @@ Tu tabla "Productos" debe incluir estos campos:
 3. Configura las variables de entorno en Vercel
 4. Deploy automático
 
+#### 📌 Receta rápida: Push a GitHub (PowerShell) y redeploy en Vercel
+
+> Rama principal: `master`. PowerShell no soporta `&&` ni `||`. Ejecuta cada comando por separado.
+
+```powershell
+# 1) Inicializar repo si hace falta
+if (-not (Test-Path .git)) { git init }
+
+# 2) (opcional) Ver rama actual
+git rev-parse --abbrev-ref HEAD  # debería ser "master"
+
+# 3) Configurar remoto si no existe
+$hasOrigin = git remote | Select-String -Pattern '^origin$' -Quiet
+if (-not $hasOrigin) { git remote add origin https://github.com/persibuloi/kamenic.git }
+
+# 4) Commit y push
+git add -A
+git commit -m "feat: Vercel Web Analytics + Speed Insights; compat Vite 6; mejoras filtros móviles"
+git push -u origin master
+
+# Si Git pide identidad, configura y vuelve a commitear:
+git config user.name "Tu Nombre"
+git config user.email "tu@email"
+git commit -m "feat: Vercel Web Analytics + Speed Insights; compat Vite 6; mejoras filtros móviles"
+git push -u origin master
+```
+
+Notas:
+- Tras el push, Vercel hace redeploy automático y toma nuevas variables de entorno/cambios de código.
+- Si prefieres CMD, puedes usar `&&`/`||` como en bash.
+
+#### 📌 Receta rápida: Push a GitHub (CMD)
+
+```cmd
+:: 1) Inicializar repo si hace falta
+git rev-parse --is-inside-work-tree || git init
+
+:: 2) (opcional) Ver rama actual
+git rev-parse --abbrev-ref HEAD  
+
+:: 3) Configurar remoto si no existe (ignora error si ya existe)
+git remote add origin https://github.com/persibuloi/kamenic.git 2>nul || echo origin ya existe
+
+:: 4) Commit y push
+git add -A && git commit -m "feat: Vercel Web Analytics + Speed Insights; compat Vite 6; mejoras filtros móviles" && git push -u origin master
+```
+
+#### 📌 Receta rápida: Push a GitHub (Git Bash)
+
+```bash
+#!/usr/bin/env bash
+set -e
+
+# 1) Inicializar repo si hace falta
+git rev-parse --is-inside-work-tree || git init
+
+# 2) (opcional) Ver rama actual
+git rev-parse --abbrev-ref HEAD
+
+# 3) Configurar remoto si no existe
+git remote get-url origin >/dev/null 2>&1 || git remote add origin https://github.com/persibuloi/kamenic.git
+
+# 4) Commit y push
+git add -A
+git commit -m "feat: Vercel Web Analytics + Speed Insights; compat Vite 6; mejoras filtros móviles" || echo "Nada que commitear"
+git push -u origin master
+```
+
 ### Netlify
 
 1. Conecta tu repositorio a [Netlify](https://netlify.com)
@@ -253,6 +321,6 @@ Archivos modificados:
 ---
 
 <div align="center">
-  <p><strong>Desarrollado con ❤️ por MiniMax Agent</strong></p>
+  <p><strong>Desarrollado con ❤️ por mvasquez</strong></p>
   <p>⭐ Si te gusta este proyecto, danos una estrella en GitHub</p>
 </div>

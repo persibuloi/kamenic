@@ -91,7 +91,7 @@ export function WeeklyDeal({ products }: WeeklyDealProps) {
   return (
     <>
       {/* Sección del Producto de la Semana */}
-      <section className="relative py-16 bg-gradient-to-br from-red-50 via-orange-50 to-amber-50 overflow-hidden">
+      <section className="relative py-12 md:py-16 bg-gradient-to-br from-red-50 via-orange-50 to-amber-50 overflow-hidden">
         {/* Elementos decorativos de fondo */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-red-200/30 to-orange-200/30 rounded-full blur-3xl"></div>
@@ -101,15 +101,15 @@ export function WeeklyDeal({ products }: WeeklyDealProps) {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header de la sección */}
           <div className="text-center mb-8 sm:mb-12">
-            <div className="inline-flex items-center bg-gradient-to-r from-red-500 to-orange-500 text-white px-6 py-2 rounded-full font-bold text-sm mb-4 animate-pulse">
+            <div className="inline-flex items-center bg-gradient-to-r from-red-500 to-orange-500 text-white px-4 py-2 sm:px-6 rounded-full font-bold text-xs sm:text-sm mb-4 animate-pulse">
               <Zap className="h-4 w-4 mr-2" />
               {featuredProducts.length > 0 ? 'PRODUCTOS DESTACADOS' : 'PRODUCTO RECOMENDADO'}
               <Zap className="h-4 w-4 ml-2" />
             </div>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               {hasMultipleProducts ? '¡Productos Destacados!' : '¡Producto Destacado!'}
             </h2>
-            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
+            <p className="text-sm sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
               {hasMultipleProducts ? 'Desliza para ver nuestros productos especiales seleccionados para ti' : 'Producto especial seleccionado con el mejor precio para ti'}
             </p>
             {hasMultipleProducts && (
@@ -128,13 +128,13 @@ export function WeeklyDeal({ products }: WeeklyDealProps) {
                   onClick={prevSlide}
                   className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-gray-700 p-2 sm:p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 backdrop-blur-sm"
                 >
-                  <ChevronLeft className="h-6 w-6" />
+                  <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
                 </button>
                 <button
                   onClick={nextSlide}
                   className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-gray-700 p-2 sm:p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 backdrop-blur-sm"
                 >
-                  <ChevronRight className="h-6 w-6" />
+                  <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
                 </button>
               </>
             )}
@@ -142,7 +142,7 @@ export function WeeklyDeal({ products }: WeeklyDealProps) {
             <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100 hover:shadow-3xl transition-all duration-300">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
                 {/* Imagen del producto */}
-                <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 p-8 lg:p-12 flex items-center justify-center">
+                <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 p-4 sm:p-6 lg:p-12 flex items-center justify-center">
                   {hasOffer && (
                     <div className="absolute top-4 left-4 bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg z-10">
                       -{savingsPercentage}%
@@ -153,7 +153,7 @@ export function WeeklyDeal({ products }: WeeklyDealProps) {
                     <img
                       src={currentProduct.imagen || '/images/product-sample-1.jpg'}
                       alt={currentProduct.descripcion}
-                      className="w-full max-w-sm h-80 object-cover rounded-2xl shadow-xl group-hover:scale-105 transition-transform duration-300"
+                      className="w-full max-w-sm h-64 sm:h-72 lg:h-80 object-cover rounded-2xl shadow-xl group-hover:scale-105 transition-transform duration-300"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.src = '/images/product-sample-1.jpg';
@@ -166,7 +166,7 @@ export function WeeklyDeal({ products }: WeeklyDealProps) {
                 </div>
 
                 {/* Información del producto */}
-                <div className="p-8 lg:p-12 flex flex-col justify-center">
+                <div className="p-6 lg:p-12 flex flex-col justify-center">
                   {/* Badges */}
                   <div className="flex flex-wrap gap-2 mb-4">
                     {featuredProducts.length > 0 && (
@@ -187,7 +187,7 @@ export function WeeklyDeal({ products }: WeeklyDealProps) {
                   </div>
 
                   {/* Nombre del producto */}
-                  <h3 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4 leading-tight">
+                  <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-4 leading-tight">
                     {currentProduct.descripcion}
                   </h3>
 
@@ -197,19 +197,19 @@ export function WeeklyDeal({ products }: WeeklyDealProps) {
                   </p>
 
                   {/* Precios */}
-                  <div className="mb-8">
+                  <div className="mb-6 sm:mb-8">
                     <div className="flex items-center gap-4 mb-2">
-                      <span className="text-3xl lg:text-4xl font-bold text-green-600">
+                      <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-green-600">
                         ${displayPrice?.toLocaleString('es-CO')}
                       </span>
                       {hasOffer && (
-                        <span className="text-xl text-gray-500 line-through">
+                        <span className="text-lg sm:text-xl text-gray-500 line-through">
                           ${currentProduct.precio1.toLocaleString('es-CO')}
                         </span>
                       )}
                     </div>
                     {hasOffer && (
-                      <p className="text-green-600 font-semibold">
+                      <p className="text-green-600 font-semibold text-sm sm:text-base">
                         ¡Ahorras ${savings.toLocaleString('es-CO')}!
                       </p>
                     )}
@@ -219,28 +219,28 @@ export function WeeklyDeal({ products }: WeeklyDealProps) {
                   <div className="flex flex-col sm:flex-row gap-3">
                     <button
                       onClick={handleAddToCart}
-                      className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                      className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-3 sm:px-6 sm:py-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-sm sm:text-base"
                     >
-                      <ShoppingBag className="h-5 w-5" />
+                      <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" />
                       <span>{inCart ? `En carrito (${quantity}) - Agregar más` : 'Agregar al Carrito'}</span>
                     </button>
 
                     <button
                       onClick={handleToggleFavorite}
-                      className={`px-6 py-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1 ${
+                      className={`px-4 py-3 sm:px-6 sm:py-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-sm sm:text-base ${
                         isProductFavorite
                           ? 'bg-red-500 hover:bg-red-600 text-white'
                           : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                       }`}
                     >
-                      <Heart className={`h-5 w-5 ${isProductFavorite ? 'fill-current' : ''}`} />
+                      <Heart className={`h-4 w-4 sm:h-5 sm:w-5 ${isProductFavorite ? 'fill-current' : ''}`} />
                     </button>
 
                     <button
                       onClick={handleViewDetails}
-                      className="px-6 py-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 bg-amber-100 hover:bg-amber-200 text-amber-700 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                      className="px-4 py-3 sm:px-6 sm:py-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 bg-amber-100 hover:bg-amber-200 text-amber-700 shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-sm sm:text-base"
                     >
-                      <Star className="h-5 w-5" />
+                      <Star className="h-4 w-4 sm:h-5 sm:w-5" />
                       <span>Ver Detalles</span>
                     </button>
                   </div>

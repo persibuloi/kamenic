@@ -257,14 +257,14 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
           <button
             onClick={handleViewDetails}
             aria-label="Ver detalles del producto"
-            className="flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-700"
+            className="flex-1 py-2.5 px-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm sm:text-base sm:py-3 sm:px-4"
           >
             <span>Detalles</span>
           </button>
           <button
             onClick={handleAddToCart}
             disabled={product.existenciaActual <= 0}
-            className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 ${
+            className={`flex-1 py-2.5 px-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center space-x-2 text-sm sm:text-base sm:py-3 sm:px-4 ${
               product.existenciaActual <= 0
                 ? 'bg-gray-400 cursor-not-allowed text-white'
                 : inCart
@@ -273,7 +273,7 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
             }`}
             aria-label={product.existenciaActual <= 0 ? 'Producto sin stock' : inCart ? `Producto en carrito (${quantity})` : 'Agregar al carrito'}
           >
-            <ShoppingBag className="h-4 w-4" />
+            <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" />
             <span>
               {product.existenciaActual <= 0 
                 ? 'Sin Stock' 
