@@ -101,14 +101,14 @@ export function FilterBar({ filters, onFiltersChange, availableBrands, available
       </div>
 
       {/* Chips de filtros rápidos (solo móvil) */}
-      <div className="md:hidden sticky top-16 sm:top-2 z-20 -mx-3 px-3 py-2 bg-white/80 backdrop-blur-md rounded-xl border border-amber-100">
-        <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-1 snap-x snap-mandatory scroll-px-3">
+      <div className="md:hidden -mx-3 px-3 py-2 bg-white rounded-xl border border-amber-100">
+        <div className="flex items-center gap-2 overflow-x-auto py-1 snap-x snap-mandatory scroll-px-3">
           {/* Solo ofertas */}
           <button
             type="button"
             onClick={handleOffersToggle}
             aria-pressed={filters.showOnlyOffers}
-            className={`shrink-0 snap-start whitespace-nowrap px-3.5 py-2 rounded-full text-[13px] border shadow-sm transition-colors ${
+            className={`shrink-0 snap-start whitespace-nowrap px-3 py-1.5 rounded-full text-[13px] border shadow-sm transition-colors ${
               filters.showOnlyOffers
                 ? 'bg-gradient-to-r from-red-500 to-red-600 text-white border-red-600 shadow-md'
                 : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
@@ -124,7 +124,7 @@ export function FilterBar({ filters, onFiltersChange, availableBrands, available
               type="button"
               onClick={() => handleGenderChange(filters.genero === g ? '' : g)}
               aria-pressed={filters.genero === g}
-              className={`shrink-0 snap-start whitespace-nowrap px-3.5 py-2 rounded-full text-[13px] border shadow-sm transition-colors ${
+              className={`shrink-0 snap-start whitespace-nowrap px-3 py-1.5 rounded-full text-[13px] border shadow-sm transition-colors ${
                 filters.genero === g
                   ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-white border-amber-600 shadow-md'
                   : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
@@ -142,7 +142,7 @@ export function FilterBar({ filters, onFiltersChange, availableBrands, available
               type="button"
               onClick={() => handleTipoMarcaChange(filters.tipoMarca === t ? '' : t)}
               aria-pressed={filters.tipoMarca === t}
-              className={`shrink-0 snap-start whitespace-nowrap px-3.5 py-2 rounded-full text-[13px] border shadow-sm transition-colors ${
+              className={`shrink-0 snap-start whitespace-nowrap px-3 py-1.5 rounded-full text-[13px] border shadow-sm transition-colors ${
                 filters.tipoMarca === t
                   ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-white border-amber-600 shadow-md'
                   : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
